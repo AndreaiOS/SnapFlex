@@ -42,4 +42,20 @@ import Testing
             capabilities: none, bracketing: nil)
         #expect(recipe == CaptureRecipe(raw: RAWKind.none, includeProcessed: true, bracketing: nil))
     }
+
+    @Test func proRAWUnsupportedBothFormats() {
+        let none = DeviceCapabilities(supportsProRAW: false, supportsBayerRAW: false)
+        let recipe = CaptureRecipe.make(
+            selection: FormatSelection(raw: .proRAW, heifCompanion: false),
+            capabilities: none, bracketing: nil)
+        #expect(recipe == CaptureRecipe(raw: RAWKind.none, includeProcessed: true, bracketing: nil))
+    }
+
+    @Test func bracketingDowngradesProRAWToNoneWhenBayerUnsupported() {
+        let proOnly = DeviceCapabilities(supportsProRAW: true, supportsBayerRAW: false)
+        let recipe = CaptureRecipe.make(
+            selection: FormatSelection(raw: .proRAW, heifCompanion: false),
+            capabilities: proOnly, bracketing: bracket)
+        #expect(recipe == CaptureRecipe(raw: RAWKind.none, includeProcessed: true, bracketing: bracket))
+    }
 }
