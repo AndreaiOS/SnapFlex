@@ -26,7 +26,7 @@ final class CameraEngine {
         self.device = device
         device.onStatusChange = { [weak self] newStatus in
             if Thread.isMainThread {
-                self?.status = newStatus
+                MainActor.assumeIsolated { self?.status = newStatus }
             } else {
                 Task { @MainActor in self?.status = newStatus }
             }
