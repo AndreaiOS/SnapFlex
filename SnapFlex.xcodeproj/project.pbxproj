@@ -9,7 +9,10 @@
 /* Begin PBXBuildFile section */
 		1139237AD387A6B02E90B7F0 /* PhotoCaptureCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */; };
 		17BEE6B2CCF25EECE6441AD4 /* ParameterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */; };
+		1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */; };
 		37E096BE9B489D708BDCBB4B /* SnapFlexCore in Frameworks */ = {isa = PBXBuildFile; productRef = 419FD1EAB2B112024220D6A8 /* SnapFlexCore */; };
+		38BA7C0DB8C77C4F9F82408C /* TopBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8170FBCBCE94A76D4EE06E7C /* TopBar.swift */; };
+		40FC27F675BE9E4FDA19D5A3 /* HistogramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */; };
 		447384718A2AB4FD99063FFE /* RealCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */; };
 		47AB36FA94AF6ADFA482F76B /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */; };
 		4991237717EB8B060F0121BE /* PhotoCaptureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */; };
@@ -49,15 +52,18 @@
 		2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewfinderScreen.swift; sourceTree = "<group>"; };
 		327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinator.swift; sourceTree = "<group>"; };
 		32CA4EF3B4BF9DA85E164C13 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistogramView.swift; sourceTree = "<group>"; };
 		457C3AFC05BB91ED93F7640B /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStore.swift; sourceTree = "<group>"; };
 		489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinatorTests.swift; sourceTree = "<group>"; };
 		537E1319B1EEC5386E46AF9B /* CameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDevice.swift; sourceTree = "<group>"; };
 		621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayMetalView.swift; sourceTree = "<group>"; };
 		62A3D069FD29E60E67240457 /* OverlayFrameDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayFrameDriver.swift; sourceTree = "<group>"; };
+		8170FBCBCE94A76D4EE06E7C /* TopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
+		BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridLevelOverlay.swift; sourceTree = "<group>"; };
 		BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterBar.swift; sourceTree = "<group>"; };
 		C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapFlexApp.swift; sourceTree = "<group>"; };
 		CAAD47BC23E172EC9ECB96C0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -147,12 +153,15 @@
 		FA9972BB87381D975C074754 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */,
+				3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */,
 				621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */,
 				BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */,
 				CC948942CC36FA4AB62B09F3 /* ParameterDial.swift */,
 				457C3AFC05BB91ED93F7640B /* PreviewView.swift */,
 				C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */,
 				CAAD47BC23E172EC9ECB96C0 /* Theme.swift */,
+				8170FBCBCE94A76D4EE06E7C /* TopBar.swift */,
 				2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */,
 			);
 			path = App;
@@ -240,6 +249,8 @@
 				8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */,
 				B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */,
 				BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */,
+				1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */,
+				40FC27F675BE9E4FDA19D5A3 /* HistogramView.swift in Sources */,
 				BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */,
 				623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */,
 				DC7246D978A486118FAF2C2C /* OverlayPipeline.swift in Sources */,
@@ -251,6 +262,7 @@
 				4D7F6CAD762D6D11BC0AD5BC /* Shaders.metal in Sources */,
 				B853A8F9BBE932A0E887E335 /* SnapFlexApp.swift in Sources */,
 				9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */,
+				38BA7C0DB8C77C4F9F82408C /* TopBar.swift in Sources */,
 				F15A41226521D1EE15BE509D /* ViewfinderScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

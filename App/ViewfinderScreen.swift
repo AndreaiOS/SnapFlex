@@ -9,6 +9,10 @@ struct ViewfinderScreen: View {
 
     @State private var selected: SelectedParameter?
     @State private var shutterFlash = false
+    @State private var aspect: AspectRatio = .fourThree
+    @State private var showGrid = false
+    @State private var showLevel = false
+    @State private var timerDuration = 0
 
     var body: some View {
         ZStack {
@@ -24,7 +28,18 @@ struct ViewfinderScreen: View {
                 .opacity(shutterFlash ? 0.7 : 0)
                 .allowsHitTesting(false)
 
+            GridLevelOverlay(showGrid: showGrid, showLevel: showLevel)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
+                TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
+                       showGrid: $showGrid, showLevel: $showLevel)
+                if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
+                    HStack {
+                        Spacer()
+                        HistogramView(bins: bins).padding(8)
+                    }
+                }
                 Spacer()
                 if let parameter = selected {
                     ParameterDial(engine: engine, parameter: parameter)
