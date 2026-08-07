@@ -62,4 +62,34 @@ final class FakePhotoLibrary: PhotoLibraryProtocol {
         await store.flushSpool()
         #expect(store.spooledCount == 1)
     }
+
+    @Test func partialGroupsAreIgnored() async {
+        let (store, library, dir) = makeStore(authorized: true)
+        let fm = FileManager.default
+        let partialDir = dir.appendingPathComponent(UUID().uuidString + ".partial")
+        try? fm.createDirectory(at: partialDir, withIntermediateDirectories: true)
+        try? Data([1, 2]).write(to: partialDir.appendingPathComponent("raw.dng"))
+
+        #expect(store.spooledCount == 0)
+        library.isAuthorized = true
+        await store.flushSpool()
+        #expect(library.saved.isEmpty)
+        #expect((try? fm.contentsOfDirectory(at: partialDir, includingPropertiesForKeys: nil)) != nil)
+    }
+
+    @Test func spooledGroupIsComplete() async {
+        let (store, library, dir) = makeStore(authorized: false)
+        await store.store(sample)
+
+        let fm = FileManager.default
+        guard let groups = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil),
+              let groupDir = groups.first else {
+            #expect(Bool(false), "No spool directory created")
+            return
+        }
+
+        let rawExists = fm.fileExists(atPath: groupDir.appendingPathComponent("raw.dng").path)
+        let heifExists = fm.fileExists(atPath: groupDir.appendingPathComponent("processed.heic").path)
+        #expect(rawExists && heifExists)
+    }
 }

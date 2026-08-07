@@ -1,6 +1,7 @@
 import Foundation
 import Photos
 import UniformTypeIdentifiers
+import os
 
 protocol PhotoLibraryProtocol {
     var isAuthorized: Bool { get }
@@ -47,6 +48,7 @@ final class CaptureStore {
     private let library: PhotoLibraryProtocol
     private let spoolDirectory: URL
     private let fileManager = FileManager.default
+    private let logger = Logger(subsystem: "co.socialsprint.snapflex", category: "capture-store")
 
     init(library: PhotoLibraryProtocol, spoolDirectory: URL) {
         self.library = library
@@ -55,8 +57,9 @@ final class CaptureStore {
     }
 
     var spooledCount: Int {
-        (try? fileManager.contentsOfDirectory(at: spoolDirectory,
-                                              includingPropertiesForKeys: nil))?.count ?? 0
+        let contents = (try? fileManager.contentsOfDirectory(at: spoolDirectory,
+                                                              includingPropertiesForKeys: nil)) ?? []
+        return contents.filter { !$0.lastPathComponent.hasSuffix(".partial") }.count
     }
 
     func store(_ resources: [CaptureResource]) async {
@@ -70,18 +73,34 @@ final class CaptureStore {
     }
 
     private func spool(_ resources: [CaptureResource]) {
-        let dir = spoolDirectory.appendingPathComponent(UUID().uuidString)
-        try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
-        for resource in resources {
-            let name = resource.kind == .rawDNG ? "raw.dng" : "processed.heic"
-            try? resource.data.write(to: dir.appendingPathComponent(name))
+        let uuid = UUID().uuidString
+        let stagingDir = spoolDirectory.appendingPathComponent("\(uuid).partial")
+        let finalDir = spoolDirectory.appendingPathComponent(uuid)
+
+        do {
+            try fileManager.createDirectory(at: stagingDir, withIntermediateDirectories: true)
+
+            // Write all files to staging directory with atomic writes
+            for resource in resources {
+                let name = resource.kind == .rawDNG ? "raw.dng" : "processed.heic"
+                let fileURL = stagingDir.appendingPathComponent(name)
+                try resource.data.write(to: fileURL, options: .atomic)
+            }
+
+            // All writes succeeded; move to final directory
+            try fileManager.moveItem(at: stagingDir, to: finalDir)
+        } catch {
+            // Clean up staging directory; never leave a partial
+            try? fileManager.removeItem(at: stagingDir)
+            logger.error("Failed to spool capture: \(error.localizedDescription)")
         }
     }
 
     func flushSpool() async {
         guard library.isAuthorized,
-              let groups = try? fileManager.contentsOfDirectory(
+              let allGroups = try? fileManager.contentsOfDirectory(
                   at: spoolDirectory, includingPropertiesForKeys: nil) else { return }
+        let groups = allGroups.filter { !$0.lastPathComponent.hasSuffix(".partial") }
         for group in groups {
             var resources: [CaptureResource] = []
             let rawURL = group.appendingPathComponent("raw.dng")
