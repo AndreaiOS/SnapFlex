@@ -26,9 +26,19 @@ final class OverlayPipeline {
     private let histogramPipeline: MTLComputePipelineState
     private let maskPipeline: MTLComputePipelineState
     private let binsBuffer: MTLBuffer
+    private let stateLock = NSLock()
 
-    var settings: OverlaySettings = .allOff
-    private(set) var maskTexture: MTLTexture?
+    private var _settings: OverlaySettings = .allOff
+    private var _maskTexture: MTLTexture?
+
+    var settings: OverlaySettings {
+        get { stateLock.lock(); defer { stateLock.unlock() }; return _settings }
+        set { stateLock.lock(); defer { stateLock.unlock() }; _settings = newValue }
+    }
+
+    var maskTexture: MTLTexture? {
+        get { stateLock.lock(); defer { stateLock.unlock() }; return _maskTexture }
+    }
 
     init?(device: MTLDevice) {
         guard let library = device.makeDefaultLibrary(),
@@ -46,6 +56,7 @@ final class OverlayPipeline {
     }
 
     func process(texture: MTLTexture, commandQueue: MTLCommandQueue) -> [UInt32]? {
+        let settings = self.settings
         guard settings.anyEnabled,
               let commandBuffer = commandQueue.makeCommandBuffer() else { return nil }
 
@@ -67,6 +78,7 @@ final class OverlayPipeline {
 
         if settings.peakingEnabled || settings.zebraEnabled {
             ensureMaskTexture(width: texture.width, height: texture.height)
+            let maskTexture = self.maskTexture
             if let maskTexture,
                let encoder = commandBuffer.makeComputeCommandEncoder() {
                 var params = MaskParams(peakingThreshold: settings.peakingThreshold,
@@ -91,10 +103,12 @@ final class OverlayPipeline {
     }
 
     private func ensureMaskTexture(width: Int, height: Int) {
-        if let maskTexture, maskTexture.width == width, maskTexture.height == height { return }
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        if let texture = _maskTexture, texture.width == width, texture.height == height { return }
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .rgba8Unorm, width: width, height: height, mipmapped: false)
         descriptor.usage = [.shaderWrite, .shaderRead]
-        maskTexture = device.makeTexture(descriptor: descriptor)
+        _maskTexture = device.makeTexture(descriptor: descriptor)
     }
 }
