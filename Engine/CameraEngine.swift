@@ -5,6 +5,7 @@ import SnapFlexCore
 @Observable @MainActor
 final class CameraEngine {
     private let device: CameraDeviceProtocol
+    private let overlayDriver: OverlayFrameDriver?
 
     private(set) var values = ManualValues(iso: nil, shutterSeconds: nil,
                                            focusPosition: nil, wbKelvin: nil, evBias: 0)
@@ -16,19 +17,30 @@ final class CameraEngine {
                                                        supportsBayerRAW: false)
     private(set) var status: SessionStatus = .notRunning
     private(set) var lastCapture: [CaptureResource]?
+    private(set) var histogramBins: [UInt32]?
 
     var formatSelection = FormatSelection(raw: .proRAW, heifCompanion: true)
     var bracketCount: Int?          // nil = off; 3 or 5
     var bracketStepEV: Float = 1.0
     var flashOn = false
+    var overlaySettings: OverlaySettings = .allOff {
+        didSet { overlayDriver?.settings = overlaySettings }
+    }
 
-    init(device: CameraDeviceProtocol) {
+    init(device: CameraDeviceProtocol, overlayDriver: OverlayFrameDriver? = nil) {
         self.device = device
+        self.overlayDriver = overlayDriver
         device.onStatusChange = { [weak self] newStatus in
             if Thread.isMainThread {
                 MainActor.assumeIsolated { self?.status = newStatus }
             } else {
                 Task { @MainActor in self?.status = newStatus }
+            }
+        }
+        if let overlayDriver, let realDevice = device as? RealCameraDevice {
+            overlayDriver.bind { handler in realDevice.setVideoFrameHandler(handler) }
+            overlayDriver.onHistogram = { [weak self] bins in
+                Task { @MainActor in self?.histogramBins = bins }
             }
         }
     }

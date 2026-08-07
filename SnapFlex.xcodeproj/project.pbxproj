@@ -14,12 +14,14 @@
 		4991237717EB8B060F0121BE /* PhotoCaptureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */; };
 		4D7F6CAD762D6D11BC0AD5BC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 32CA4EF3B4BF9DA85E164C13 /* Shaders.metal */; };
 		594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */; };
+		623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */; };
 		65015462886289F1C00BD38C /* ShaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19500F32976684BCFADBA6C /* ShaderTests.swift */; };
 		67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */; };
 		8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537E1319B1EEC5386E46AF9B /* CameraDevice.swift */; };
 		9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAAD47BC23E172EC9ECB96C0 /* Theme.swift */; };
 		B853A8F9BBE932A0E887E335 /* SnapFlexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */; };
 		B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */; };
+		BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A3D069FD29E60E67240457 /* OverlayFrameDriver.swift */; };
 		BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */; };
 		D8CD8F617A9A903B42031249 /* CaptureStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */; };
 		DC7246D978A486118FAF2C2C /* OverlayPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */; };
@@ -45,6 +47,8 @@
 		46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStore.swift; sourceTree = "<group>"; };
 		489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinatorTests.swift; sourceTree = "<group>"; };
 		537E1319B1EEC5386E46AF9B /* CameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDevice.swift; sourceTree = "<group>"; };
+		621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayMetalView.swift; sourceTree = "<group>"; };
+		62A3D069FD29E60E67240457 /* OverlayFrameDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayFrameDriver.swift; sourceTree = "<group>"; };
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
@@ -91,6 +95,7 @@
 		586B284DD3C1FFF648BC8BA2 /* Overlay */ = {
 			isa = PBXGroup;
 			children = (
+				62A3D069FD29E60E67240457 /* OverlayFrameDriver.swift */,
 				15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */,
 				32CA4EF3B4BF9DA85E164C13 /* Shaders.metal */,
 			);
@@ -134,6 +139,7 @@
 		FA9972BB87381D975C074754 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */,
 				C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */,
 				CAAD47BC23E172EC9ECB96C0 /* Theme.swift */,
 			);
@@ -222,6 +228,8 @@
 				8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */,
 				B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */,
 				BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */,
+				BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */,
+				623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */,
 				DC7246D978A486118FAF2C2C /* OverlayPipeline.swift in Sources */,
 				4991237717EB8B060F0121BE /* PhotoCaptureCoordinator.swift in Sources */,
 				447384718A2AB4FD99063FFE /* RealCameraDevice.swift in Sources */,

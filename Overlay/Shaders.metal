@@ -61,3 +61,39 @@ kernel void maskKernel(texture2d<float, access::read> input [[texture(0)]],
 
     output.write(float4(peaking, zebra, 0.0, max(peaking, zebra)), gid);
 }
+
+struct OverlayVertexOut {
+    float4 position [[position]];
+    float2 uv;
+};
+
+vertex OverlayVertexOut overlayVertex(uint vid [[vertex_id]]) {
+    // Fullscreen triangle
+    float2 positions[3] = { float2(-1, -1), float2(3, -1), float2(-1, 3) };
+    OverlayVertexOut out;
+    out.position = float4(positions[vid], 0, 1);
+    out.uv = positions[vid] * 0.5 + 0.5;
+    out.uv.y = 1.0 - out.uv.y;
+    return out;
+}
+
+fragment float4 overlayFragment(OverlayVertexOut in [[stage_in]],
+                                texture2d<float, access::sample> mask [[texture(0)]]) {
+    constexpr sampler s(mag_filter::linear, min_filter::linear);
+    float4 m = mask.sample(s, in.uv);
+    // Peaking: accent green #4ADE80
+    float3 color = float3(0.0);
+    float alpha = 0.0;
+    if (m.r > 0.5) {
+        color = float3(0.29, 0.87, 0.50);
+        alpha = 0.9;
+    } else if (m.g > 0.5) {
+        // Zebra: diagonal stripes, 8px pitch in mask space
+        float stripe = fmod(in.position.x + in.position.y, 16.0);
+        if (stripe < 8.0) {
+            color = float3(1.0);
+            alpha = 0.7;
+        }
+    }
+    return float4(color * alpha, alpha);   // premultiplied
+}

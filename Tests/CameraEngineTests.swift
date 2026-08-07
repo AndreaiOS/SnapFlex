@@ -72,4 +72,13 @@ import SnapFlexCore
         #expect(exposures.count == 3)
         #expect(exposures[1].shutterSeconds == 1.0/120)
     }
+
+    @Test func overlaySettingsPublishWithoutDriver() {
+        let (engine, _) = makeEngine()
+        var settings = OverlaySettings.allOff
+        settings.histogramEnabled = true
+        engine.overlaySettings = settings
+        #expect(engine.overlaySettings.histogramEnabled)
+        #expect(engine.histogramBins == nil)
+    }
 }
