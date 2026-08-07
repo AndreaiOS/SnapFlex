@@ -1,11 +1,13 @@
 import AVFoundation
 import SwiftUI
 import SnapFlexCore
+import UIKit
 
 struct ViewfinderScreen: View {
     let engine: CameraEngine
     let session: AVCaptureSession
     let driver: OverlayFrameDriver?
+    let store: CaptureStore
 
     @State private var selected: SelectedParameter?
     @State private var shutterFlash = false
@@ -13,10 +15,13 @@ struct ViewfinderScreen: View {
     @State private var showGrid = false
     @State private var showLevel = false
     @State private var timerDuration = 0
+    @State private var countdown: Int?
+    @State private var countdownTask: Task<Void, Never>?
+    @State private var lastThumbnail: UIImage?
 
     var body: some View {
         ZStack {
-            PreviewView(session: session)
+            PreviewView(session: session, onCaptureEvent: { takePhoto() })
                 .ignoresSafeArea()
             if let driver, engine.overlaySettings.peakingEnabled || engine.overlaySettings.zebraEnabled {
                 OverlayMetalView(driver: driver)
@@ -27,6 +32,13 @@ struct ViewfinderScreen: View {
                 .ignoresSafeArea()
                 .opacity(shutterFlash ? 0.7 : 0)
                 .allowsHitTesting(false)
+
+            if let countdown {
+                Text("\(countdown)")
+                    .font(Theme.valueFont(64))
+                    .foregroundStyle(Theme.accent)
+                    .allowsHitTesting(false)
+            }
 
             GridLevelOverlay(showGrid: showGrid, showLevel: showLevel)
                 .ignoresSafeArea()
@@ -60,9 +72,24 @@ struct ViewfinderScreen: View {
 
     private var bottomRow: some View {
         HStack {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color(white: 0.2))
-                .frame(width: 40, height: 40)
+            Button {
+                if let url = URL(string: "photos-redirect://") {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                if let lastThumbnail {
+                    Image(uiImage: lastThumbnail)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 40, height: 40)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                } else {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(white: 0.2))
+                        .frame(width: 40, height: 40)
+                }
+            }
+            .buttonStyle(.plain)
             Spacer()
             Button {
                 takePhoto()
@@ -95,10 +122,39 @@ struct ViewfinderScreen: View {
     }
 
     func takePhoto() {
+        if countdownTask != nil {
+            countdownTask?.cancel()
+            countdownTask = nil
+            countdown = nil
+            return
+        }
+        guard timerDuration > 0 else { performCapture(); return }
+        var timer = CaptureTimer(duration: timerDuration)
+        timer.start()
+        countdownTask = Task {
+            while case .counting(let remaining) = timer.state {
+                countdown = remaining
+                try? await Task.sleep(for: .seconds(1))
+                if Task.isCancelled { return }
+                timer.tick()
+            }
+            countdown = nil
+            countdownTask = nil
+            if timer.state == .fired { performCapture() }
+        }
+    }
+
+    private func performCapture() {
         withAnimation(.easeOut(duration: 0.1)) { shutterFlash = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
             withAnimation(.easeIn(duration: 0.15)) { shutterFlash = false }
         }
-        engine.capture { _ in }
+        engine.capture { resources in
+            if let heif = resources.first(where: { $0.kind == .processedHEIF }),
+               let image = UIImage(data: heif.data) {
+                lastThumbnail = image
+            }
+            Task { await store.store(resources) }
+        }
     }
 }

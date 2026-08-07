@@ -1,8 +1,10 @@
 import AVFoundation
+import AVKit
 import SwiftUI
 
 struct PreviewView: UIViewRepresentable {
     let session: AVCaptureSession
+    var onCaptureEvent: () -> Void = {}
 
     final class PreviewUIView: UIView {
         override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
@@ -14,6 +16,10 @@ struct PreviewView: UIViewRepresentable {
         view.previewLayer.session = session
         view.previewLayer.videoGravity = .resizeAspect
         view.backgroundColor = .black
+        let interaction = AVCaptureEventInteraction { event in
+            if event.phase == .began { self.onCaptureEvent() }
+        }
+        view.addInteraction(interaction)
         return view
     }
 
