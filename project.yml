@@ -1,0 +1,44 @@
+name: SnapFlex
+options:
+  bundleIdPrefix: co.socialsprint
+  deploymentTarget:
+    iOS: "18.0"
+packages:
+  SnapFlexCore:
+    path: Core
+targets:
+  SnapFlex:
+    type: application
+    platform: iOS
+    sources: [App, Engine, Overlay]
+    dependencies:
+      - package: SnapFlexCore
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_NSCameraUsageDescription: "SnapFlex needs the camera to take photos."
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "SnapFlex saves your photos to your library."
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        GENERATE_INFOPLIST_FILE: YES
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.0"
+  SnapFlexTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: SnapFlex
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  SnapFlex:
+    build:
+      targets:
+        SnapFlex: all
+        SnapFlexTests: [test]
+    test:
+      targets: [SnapFlexTests]
