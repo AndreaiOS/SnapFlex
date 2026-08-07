@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		37E096BE9B489D708BDCBB4B /* SnapFlexCore in Frameworks */ = {isa = PBXBuildFile; productRef = 419FD1EAB2B112024220D6A8 /* SnapFlexCore */; };
+		447384718A2AB4FD99063FFE /* RealCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */; };
 		47AB36FA94AF6ADFA482F76B /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */; };
 		594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */; };
 		67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */; };
@@ -38,6 +39,7 @@
 		C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapFlexApp.swift; sourceTree = "<group>"; };
 		CAAD47BC23E172EC9ECB96C0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
+		F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealCameraDevice.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +67,7 @@
 			children = (
 				537E1319B1EEC5386E46AF9B /* CameraDevice.swift */,
 				9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */,
+				F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -197,6 +200,7 @@
 			files = (
 				8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */,
 				B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */,
+				447384718A2AB4FD99063FFE /* RealCameraDevice.swift in Sources */,
 				B853A8F9BBE932A0E887E335 /* SnapFlexApp.swift in Sources */,
 				9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */,
 			);
