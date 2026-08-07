@@ -31,6 +31,9 @@ struct ViewfinderScreen: View {
             GridLevelOverlay(showGrid: showGrid, showLevel: showLevel)
                 .ignoresSafeArea()
 
+            AspectMask(aspect: aspect)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
                 TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
                        showGrid: $showGrid, showLevel: $showLevel)

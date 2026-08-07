@@ -23,6 +23,23 @@ enum AspectRatio: CaseIterable {
     }
 }
 
+struct AspectMask: View {
+    let aspect: AspectRatio
+
+    var body: some View {
+        GeometryReader { geo in
+            let visible = min(geo.size.height, aspect.heightFraction(ofWidth: geo.size.width))
+            let band = max(0, (geo.size.height - visible) / 2)
+            VStack(spacing: 0) {
+                Color.black.opacity(0.45).frame(height: band)
+                Color.clear
+                Color.black.opacity(0.45).frame(height: band)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
 struct TopBar: View {
     let engine: CameraEngine
     @Binding var aspect: AspectRatio
