@@ -14,6 +14,7 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     private var currentInput: AVCaptureDeviceInput?
     private var currentDevice: AVCaptureDevice?
     private var frameHandler: ((CVPixelBuffer) -> Void)?
+    private var activeCoordinators: Set<PhotoCaptureCoordinator> = []
 
     var onStatusChange: ((SessionStatus) -> Void)?
     private(set) var activeLens: LensKind = .wide
@@ -203,7 +204,27 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
 
     func capture(recipe: CaptureRecipe, flashOn: Bool,
                  completion: @escaping ([CaptureResource]) -> Void) {
-        completion([])
+        sessionQueue.async { [self] in
+            let rawType: OSType? = switch recipe.raw {
+            case .proRAW:
+                photoOutput.availableRawPhotoPixelFormatTypes
+                    .first { AVCapturePhotoOutput.isAppleProRAWPixelFormat($0) }
+            case .bayer:
+                photoOutput.availableRawPhotoPixelFormatTypes
+                    .first { AVCapturePhotoOutput.isBayerRAWPixelFormat($0) }
+            case .none:
+                nil
+            }
+            let settings = PhotoCaptureCoordinator.makeSettings(
+                recipe: recipe, rawType: rawType, flashOn: flashOn)
+            var coordinator: PhotoCaptureCoordinator!
+            coordinator = PhotoCaptureCoordinator { [weak self] resources in
+                completion(resources)
+                self?.sessionQueue.async { self?.activeCoordinators.remove(coordinator) }
+            }
+            activeCoordinators.insert(coordinator)
+            photoOutput.capturePhoto(with: settings, delegate: coordinator)
+        }
     }
 }
 
