@@ -9,8 +9,12 @@
 /* Begin PBXBuildFile section */
 		37E096BE9B489D708BDCBB4B /* SnapFlexCore in Frameworks */ = {isa = PBXBuildFile; productRef = 419FD1EAB2B112024220D6A8 /* SnapFlexCore */; };
 		47AB36FA94AF6ADFA482F76B /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */; };
+		594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */; };
+		67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */; };
+		8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537E1319B1EEC5386E46AF9B /* CameraDevice.swift */; };
 		9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAAD47BC23E172EC9ECB96C0 /* Theme.swift */; };
 		B853A8F9BBE932A0E887E335 /* SnapFlexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */; };
+		B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,8 +28,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeCameraDevice.swift; sourceTree = "<group>"; };
+		0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngineTests.swift; sourceTree = "<group>"; };
 		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		537E1319B1EEC5386E46AF9B /* CameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDevice.swift; sourceTree = "<group>"; };
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
 		C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapFlexApp.swift; sourceTree = "<group>"; };
 		CAAD47BC23E172EC9ECB96C0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -55,6 +63,8 @@
 		3A90C7037B58787CE767401B /* Engine */ = {
 			isa = PBXGroup;
 			children = (
+				537E1319B1EEC5386E46AF9B /* CameraDevice.swift */,
+				9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -90,6 +100,8 @@
 		F84FCA7F61494136B70ABD85 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */,
+				0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */,
 				D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */,
 			);
 			path = Tests;
@@ -183,6 +195,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */,
+				B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */,
 				B853A8F9BBE932A0E887E335 /* SnapFlexApp.swift in Sources */,
 				9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */,
 			);
@@ -192,6 +206,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */,
+				67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */,
 				47AB36FA94AF6ADFA482F76B /* SmokeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
