@@ -8,6 +8,7 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     let videoOutput = AVCaptureVideoDataOutput()
     private let sessionQueue = DispatchQueue(label: "co.socialsprint.snapflex.session")
     private let videoQueue = DispatchQueue(label: "co.socialsprint.snapflex.video")
+    private let frameHandlerLock = NSLock()
 
     private var devicesByLens: [LensKind: AVCaptureDevice] = [:]
     private var currentInput: AVCaptureDeviceInput?
@@ -38,8 +39,12 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
             name: AVCaptureSession.interruptionEndedNotification, object: session)
     }
 
-    @objc private func sessionInterrupted() { onStatusChange?(.interrupted) }
-    @objc private func sessionResumed() { onStatusChange?(.running) }
+    @objc private func sessionInterrupted() { notifyStatus(.interrupted) }
+    @objc private func sessionResumed() { notifyStatus(.running) }
+
+    private func notifyStatus(_ status: SessionStatus) {
+        DispatchQueue.main.async { [weak self] in self?.onStatusChange?(status) }
+    }
 
     // MARK: - CameraDeviceProtocol
 
@@ -81,7 +86,7 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
             videoOutput.alwaysDiscardsLateVideoFrames = true
             session.commitConfiguration()
             session.startRunning()
-            onStatusChange?(.running)
+            notifyStatus(.running)
         }
         sessionQueue.sync {}   // callers read ranges right after start
     }
@@ -89,7 +94,7 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     func stop() {
         sessionQueue.async { [self] in
             session.stopRunning()
-            onStatusChange?(.notRunning)
+            notifyStatus(.notRunning)
         }
     }
 
@@ -178,7 +183,9 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
 
     func setVideoFrameHandler(_ handler: ((CVPixelBuffer) -> Void)?) {
         sessionQueue.async { [self] in
+            frameHandlerLock.lock()
             frameHandler = handler
+            frameHandlerLock.unlock()
             session.beginConfiguration()
             if handler != nil {
                 if !session.outputs.contains(videoOutput), session.canAddOutput(videoOutput) {
@@ -204,6 +211,9 @@ extension RealCameraDevice: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        frameHandler?(pixelBuffer)
+        frameHandlerLock.lock()
+        let handler = frameHandler
+        frameHandlerLock.unlock()
+        handler?(pixelBuffer)
     }
 }
