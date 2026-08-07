@@ -50,7 +50,9 @@ final class PhotoCaptureCoordinator: NSObject, AVCapturePhotoCaptureDelegate {
             settings = AVCapturePhotoSettings(
                 format: processedFormat ?? [AVVideoCodecKey: AVVideoCodecType.hevc])
         }
-        settings.flashMode = flashOn ? .on : .off
+        if !(settings is AVCapturePhotoBracketSettings) {
+            settings.flashMode = flashOn ? .on : .off
+        }
         return settings
     }
 

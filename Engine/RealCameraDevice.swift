@@ -14,7 +14,7 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     private var currentInput: AVCaptureDeviceInput?
     private var currentDevice: AVCaptureDevice?
     private var frameHandler: ((CVPixelBuffer) -> Void)?
-    private var activeCoordinators: Set<PhotoCaptureCoordinator> = []
+    private var activeCoordinators: [UUID: PhotoCaptureCoordinator] = [:]
 
     var onStatusChange: ((SessionStatus) -> Void)?
     private(set) var activeLens: LensKind = .wide
@@ -217,12 +217,12 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
             }
             let settings = PhotoCaptureCoordinator.makeSettings(
                 recipe: recipe, rawType: rawType, flashOn: flashOn)
-            var coordinator: PhotoCaptureCoordinator!
-            coordinator = PhotoCaptureCoordinator { [weak self] resources in
+            let id = UUID()
+            let coordinator = PhotoCaptureCoordinator { [weak self] resources in
                 completion(resources)
-                self?.sessionQueue.async { self?.activeCoordinators.remove(coordinator) }
+                self?.sessionQueue.async { self?.activeCoordinators[id] = nil }
             }
-            activeCoordinators.insert(coordinator)
+            activeCoordinators[id] = coordinator
             photoOutput.capturePhoto(with: settings, delegate: coordinator)
         }
     }
