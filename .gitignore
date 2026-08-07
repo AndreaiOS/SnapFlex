@@ -3,6 +3,9 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 
+# Swift Package Manager
+.build/
+
 # Superpowers brainstorm sessions
 .superpowers/
 
