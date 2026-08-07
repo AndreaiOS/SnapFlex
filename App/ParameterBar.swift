@@ -45,7 +45,7 @@ struct ParameterBar: View {
                     .foregroundStyle(Theme.inactiveText)
                 Text(value)
                     .font(Theme.valueFont(13))
-                    .foregroundStyle(isManual || isSelected ? Theme.accent : .white)
+                    .foregroundStyle(isManual || isSelected ? Theme.accent : Theme.inactiveText)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 5)

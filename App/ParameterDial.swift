@@ -103,16 +103,20 @@ struct ParameterDial: View {
     }
 
     private func normalizedLog(_ value: Double, _ low: Double, _ high: Double) -> Double {
-        (log(value) - log(low)) / (log(high) - log(low))
+        guard high > low, low > 0 else { return 0.5 }
+        return (log(value) - log(low)) / (log(high) - log(low))
     }
     private func valueLog(_ normalized: Double, _ low: Double, _ high: Double) -> Double {
-        exp(log(low) + normalized * (log(high) - log(low)))
+        guard high > low, low > 0 else { return low }
+        return exp(log(low) + normalized * (log(high) - log(low)))
     }
     private func normalizedLinear(_ value: Double, _ low: Double, _ high: Double) -> Double {
-        (value - low) / (high - low)
+        guard high > low else { return 0.5 }
+        return (value - low) / (high - low)
     }
     private func valueLinear(_ normalized: Double, _ low: Double, _ high: Double) -> Double {
-        low + normalized * (high - low)
+        guard high > low else { return low }
+        return low + normalized * (high - low)
     }
     private func midLog(_ low: Double, _ high: Double) -> Double { (low * high).squareRoot() }
 }
