@@ -26,6 +26,10 @@ final class CameraEngine {
     var overlaySettings: OverlaySettings = .allOff {
         didSet { overlayDriver?.settings = overlaySettings }
     }
+    var longMode: LongMode = .off
+    var longBlend: LongBlend = .nd
+
+    private var didLockAE = false
 
     init(device: CameraDeviceProtocol, overlayDriver: OverlayFrameDriver? = nil) {
         self.device = device
@@ -165,5 +169,21 @@ final class CameraEngine {
             return .manual(iso: iso, shutterSeconds: shutter)
         }
         return .auto
+    }
+
+    // MARK: - Long Exposure
+
+    func prepareLongExposure() {
+        if values.iso == nil || values.shutterSeconds == nil {
+            device.lockAutoExposure()
+            didLockAE = true
+        }
+    }
+
+    func endLongExposure() {
+        if didLockAE {
+            device.unlockAutoExposure()
+            didLockAE = false
+        }
     }
 }

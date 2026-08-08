@@ -247,6 +247,22 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
         }
     }
 
+    func lockAutoExposure() {
+        withLockedDevice { device in
+            if device.isExposureModeSupported(.locked) {
+                device.exposureMode = .locked
+            }
+        }
+    }
+
+    func unlockAutoExposure() {
+        withLockedDevice { device in
+            if device.isExposureModeSupported(.continuousAutoExposure) {
+                device.exposureMode = .continuousAutoExposure
+            }
+        }
+    }
+
     // MARK: - Video frames (overlay pipeline, Task 12)
 
     func setVideoFrameHandler(_ handler: ((CVPixelBuffer) -> Void)?) {

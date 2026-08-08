@@ -41,6 +41,8 @@ protocol CameraDeviceProtocol: AnyObject {
     func setAutoFocus()
     func setWhiteBalance(kelvin: Int?)
     func setZoom(_ factor: Double)
+    func lockAutoExposure()
+    func unlockAutoExposure()
     func capture(recipe: CaptureRecipe, flashOn: Bool,
                  completion: @escaping ([CaptureResource]) -> Void)
 }

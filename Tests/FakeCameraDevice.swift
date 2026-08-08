@@ -21,6 +21,8 @@ final class FakeCameraDevice: CameraDeviceProtocol {
     var lockedFocusPositions: [Float] = []
     var autoFocusCalls = 0
     var appliedKelvins: [Int?] = []
+    var lockCalls = 0
+    var unlockCalls = 0
     var capturedRecipes: [CaptureRecipe] = []
     var captureResult: [CaptureResource] = [CaptureResource(kind: .processedHEIF, data: Data([1]))]
 
@@ -34,6 +36,8 @@ final class FakeCameraDevice: CameraDeviceProtocol {
     func setAutoFocus() { autoFocusCalls += 1 }
     func setWhiteBalance(kelvin: Int?) { appliedKelvins.append(kelvin) }
     func setZoom(_ factor: Double) {}
+    func lockAutoExposure() { lockCalls += 1 }
+    func unlockAutoExposure() { unlockCalls += 1 }
     func capture(recipe: CaptureRecipe, flashOn: Bool,
                  completion: @escaping ([CaptureResource]) -> Void) {
         capturedRecipes.append(recipe)

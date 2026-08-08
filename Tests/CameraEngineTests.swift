@@ -92,4 +92,22 @@ import SnapFlexCore
         #expect(engine.overlaySettings.histogramEnabled)
         #expect(engine.histogramBins == nil)
     }
+
+    @Test func prepareLongLocksAEOnlyWhenAuto() {
+        let (engine, device) = makeEngine()
+        engine.prepareLongExposure()
+        #expect(device.lockCalls == 1)
+        engine.endLongExposure()
+        #expect(device.unlockCalls == 1)
+    }
+
+    @Test func prepareLongKeepsManualExposure() {
+        let (engine, device) = makeEngine()
+        engine.setISO(100)
+        engine.setShutter(1.0 / 60)
+        engine.prepareLongExposure()
+        #expect(device.lockCalls == 0)
+        engine.endLongExposure()
+        #expect(device.unlockCalls == 0)
+    }
 }
