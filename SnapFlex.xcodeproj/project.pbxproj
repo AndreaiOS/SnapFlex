@@ -26,6 +26,7 @@
 		623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */; };
 		65015462886289F1C00BD38C /* ShaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19500F32976684BCFADBA6C /* ShaderTests.swift */; };
 		67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */; };
+		87DDBA41442BF83685A496C6 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5563AF0DF2EA31A94A8586D7 /* Haptics.swift */; };
 		8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537E1319B1EEC5386E46AF9B /* CameraDevice.swift */; };
 		9A7B9845893A8AD73F6F45B1 /* PermissionGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A175F8825986D9B794759E53 /* PermissionGate.swift */; };
 		9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAAD47BC23E172EC9ECB96C0 /* Theme.swift */; };
@@ -71,6 +72,7 @@
 		46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStore.swift; sourceTree = "<group>"; };
 		489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinatorTests.swift; sourceTree = "<group>"; };
 		537E1319B1EEC5386E46AF9B /* CameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDevice.swift; sourceTree = "<group>"; };
+		5563AF0DF2EA31A94A8586D7 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationModel.swift; sourceTree = "<group>"; };
 		5D0F682143B9DB436AF6D439 /* OrientationModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationModelTests.swift; sourceTree = "<group>"; };
 		621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayMetalView.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 			children = (
 				7C025B67D84EDEB54171BE9F /* Assets.xcassets */,
 				BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */,
+				5563AF0DF2EA31A94A8586D7 /* Haptics.swift */,
 				3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */,
 				FB27654374FCFD6F00971A2B /* LongExposureHUD.swift */,
 				19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */,
@@ -306,6 +309,7 @@
 				B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */,
 				BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */,
 				1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */,
+				87DDBA41442BF83685A496C6 /* Haptics.swift in Sources */,
 				40FC27F675BE9E4FDA19D5A3 /* HistogramView.swift in Sources */,
 				621CCED423DBF124DEA90B41 /* LongExposureAccumulator.swift in Sources */,
 				4B6CC2E95068B4C7FAE487E4 /* LongExposureController.swift in Sources */,
