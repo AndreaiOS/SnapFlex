@@ -118,9 +118,11 @@ struct ViewfinderScreen: View {
         .gesture(
             MagnifyGesture()
                 .onChanged { value in
+                    guard !isLongExposing else { return }
                     engine.setZoom(zoomBase * value.magnification)
                 }
                 .onEnded { value in
+                    guard !isLongExposing else { return }
                     zoomBase = min(max(zoomBase * value.magnification,
                                        engine.ranges.zoom.lowerBound),
                                    engine.ranges.zoom.upperBound)
