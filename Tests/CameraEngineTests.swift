@@ -110,4 +110,15 @@ import SnapFlexCore
         engine.endLongExposure()
         #expect(device.unlockCalls == 0)
     }
+
+    @Test func endLongReappliesPartialManualExposure() {
+        let (engine, device) = makeEngine()
+        engine.setISO(400)                    // partial manual: shutter still auto
+        engine.prepareLongExposure()
+        #expect(device.lockCalls == 1)        // OR condition: partial manual still locks AE
+        engine.endLongExposure()
+        #expect(device.unlockCalls == 1)
+        let applied = device.appliedExposures.last!
+        #expect(applied.iso == 400)           // custom exposure re-applied after unlock
+    }
 }

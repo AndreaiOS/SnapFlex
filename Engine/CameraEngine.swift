@@ -185,5 +185,8 @@ final class CameraEngine {
             device.unlockAutoExposure()
             didLockAE = false
         }
+        if values.iso != nil || values.shutterSeconds != nil {
+            applyExposure()   // restore custom exposure the lock overrode
+        }
     }
 }
