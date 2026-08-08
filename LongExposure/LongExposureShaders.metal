@@ -44,7 +44,7 @@ vertex LongVertexOut longVertex(uint vid [[vertex_id]]) {
 
 fragment float4 accumulationFragment(LongVertexOut in [[stage_in]],
                                      texture2d<float, access::sample> acc [[texture(0)]]) {
-    constexpr sampler s(mag_filter::linear, min_filter::linear);
+    constexpr sampler s(mag_filter::nearest, min_filter::nearest);
     float4 color = acc.sample(s, in.uv);
     return float4(clamp(color.rgb, 0.0, 1.0), 1.0);
 }
