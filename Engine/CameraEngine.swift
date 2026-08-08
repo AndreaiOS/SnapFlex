@@ -50,10 +50,16 @@ final class CameraEngine {
         self.overlayDriver = overlayDriver
         self.realDevice = device as? RealCameraDevice
         device.onStatusChange = { [weak self] newStatus in
+            let apply: @MainActor () -> Void = {
+                self?.status = newStatus
+                // Ranges/capabilities are only trustworthy once the session is
+                // configured; start()/switchTo() no longer block for them.
+                if newStatus == .running { self?.syncAfterDeviceChange() }
+            }
             if Thread.isMainThread {
-                MainActor.assumeIsolated { self?.status = newStatus }
+                MainActor.assumeIsolated { apply() }
             } else {
-                Task { @MainActor in self?.status = newStatus }
+                Task { @MainActor in apply() }
             }
         }
         device.onControlEvent = { [weak self] event in
@@ -69,6 +75,12 @@ final class CameraEngine {
 
     func start() {
         device.start()
+        syncAfterDeviceChange()
+    }
+
+    /// Re-reads device state and downgrades an unsupported format choice.
+    /// Called optimistically at start and again on every `.running` callback.
+    private func syncAfterDeviceChange() {
         refreshFromDevice()
         if formatSelection.raw == .proRAW && !capabilities.supportsProRAW {
             formatSelection.raw = capabilities.supportsBayerRAW ? .bayer : .off

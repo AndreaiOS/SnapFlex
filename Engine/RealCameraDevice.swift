@@ -99,7 +99,10 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
             session.startRunning()
             notifyStatus(.running)
         }
-        sessionQueue.sync {}   // callers read ranges right after start
+        // No sync barrier: blocking the main thread on session startup risks a
+        // scene-create watchdog kill (0x8BADF00D deadlock observed on device when
+        // startRunning/controls setup needs the main thread). Callers get real
+        // ranges via the .running status callback.
     }
 
     func stop() {
@@ -129,11 +132,14 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     }
 
     func switchTo(_ lens: LensKind) {
-        sessionQueue.sync { [self] in
+        sessionQueue.async { [self] in
             session.beginConfiguration()
             attach(lens: lens)
             if let device = currentDevice { configureControls(for: device) }
             session.commitConfiguration()
+            // Same-status notification: signals the engine to re-read ranges,
+            // lenses and capabilities for the newly attached device.
+            notifyStatus(.running)
         }
     }
 
