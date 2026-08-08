@@ -20,6 +20,8 @@ struct ParameterBar: View {
     @Binding var selected: SelectedParameter?
     var rotation: Double = 0
 
+    @Namespace private var selectionNS
+
     var body: some View {
         HStack(spacing: 2) {
             ForEach(SelectedParameter.allCases, id: \.self) { parameter in
@@ -27,6 +29,7 @@ struct ParameterBar: View {
             }
         }
         .padding(.horizontal, 8)
+        .animation(Theme.motion(Theme.springStandard), value: selected)
     }
 
     private func tile(_ parameter: SelectedParameter) -> some View {
@@ -38,6 +41,7 @@ struct ParameterBar: View {
                 selected = nil
             } else {
                 selected = parameter
+                Haptics.selection()
             }
         } label: {
             VStack(spacing: 2) {
@@ -47,11 +51,19 @@ struct ParameterBar: View {
                 Text(value)
                     .font(Theme.valueFont(13))
                     .foregroundStyle(isManual || isSelected ? Theme.accent : Theme.inactiveText)
+                    .contentTransition(.numericText())
+                    .animation(Theme.motion(Theme.springStandard), value: value)
             }
             .rotatesWithDevice(rotation)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 5)
-            .background(isSelected ? Theme.accent.opacity(0.15) : .clear)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(Theme.accent.opacity(0.15))
+                        .matchedGeometryEffect(id: "tile-selection", in: selectionNS)
+                }
+            }
             .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)

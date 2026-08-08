@@ -79,7 +79,10 @@ struct TopBar: View {
     }
 
     private func chip(_ text: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button {
+            action()
+            Haptics.light()
+        } label: {
             Text(text)
                 .font(Theme.valueFont(10))
                 .foregroundStyle(.white)
@@ -88,6 +91,8 @@ struct TopBar: View {
                 .background(Color.white.opacity(0.12))
                 .clipShape(Capsule())
                 .rotatesWithDevice(rotation)
+                .contentTransition(.numericText())
+                .animation(Theme.motion(Theme.springStandard), value: text)
         }
         .buttonStyle(.plain)
     }

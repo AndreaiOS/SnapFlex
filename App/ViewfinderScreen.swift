@@ -45,6 +45,7 @@ struct ViewfinderScreen: View {
     @State private var countdown: Int?
     @State private var countdownTask: Task<Void, Never>?
     @State private var lastThumbnail: UIImage?
+    @State private var thumbnailID = 0
     @State private var zoomBase: Double = 1
     @State private var orientation = OrientationModel()
     @State private var longController = LongExposureController()
@@ -167,6 +168,7 @@ struct ViewfinderScreen: View {
                     .rotatesWithDevice(orientation.uiAngle)
                     .allowsHitTesting(false)
                     .transition(.opacity)
+                    .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
         }
@@ -236,6 +238,8 @@ struct ViewfinderScreen: View {
                             .scaledToFill()
                             .frame(width: 40, height: 40)
                             .clipShape(RoundedRectangle(cornerRadius: 6))
+                            .id(thumbnailID)
+                            .transition(.scale(scale: 0.6).combined(with: .opacity))
                     } else {
                         RoundedRectangle(cornerRadius: 6)
                             .fill(Color(white: 0.2))
@@ -258,12 +262,20 @@ struct ViewfinderScreen: View {
                 Button {
                     takePhoto()
                 } label: {
-                    Circle()
-                        .fill(.white)
-                        .frame(width: 62, height: 62)
-                        .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 4).padding(-5))
+                    ZStack {
+                        Circle()
+                            .fill(.white)
+                            .frame(width: 62, height: 62)
+                            .opacity(isLongExposing ? 0 : 1)
+                        Circle()
+                            .stroke(Color.white, lineWidth: 4)
+                            .frame(width: 62, height: 62)
+                            .opacity(isLongExposing ? 1 : 0)
+                    }
+                    .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 4).padding(-5))
+                    .animation(Theme.motion(Theme.springStandard), value: isLongExposing)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ShutterButtonStyle())
                 .scaleEffect(chromeHidden ? 54.0 / 62.0 : 1)
                 .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
             }
@@ -341,7 +353,13 @@ struct ViewfinderScreen: View {
             engine.endLongFrames()
             engine.endLongExposure()
             if let data {
-                if let image = UIImage(data: data) { lastThumbnail = image }
+                Haptics.success()
+                if let image = UIImage(data: data) {
+                    withAnimation(Theme.motion(Theme.springBouncy)) {
+                        lastThumbnail = image
+                        thumbnailID += 1
+                    }
+                }
                 let resource = CaptureResource(kind: .processedHEIF, data: data)
                 Task {
                     await store.store([resource])
@@ -354,6 +372,7 @@ struct ViewfinderScreen: View {
     }
 
     private func performCapture() {
+        Haptics.medium()
         withAnimation(.easeOut(duration: 0.1)) { shutterFlash = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
             withAnimation(.easeIn(duration: 0.15)) { shutterFlash = false }
@@ -361,9 +380,21 @@ struct ViewfinderScreen: View {
         engine.capture { resources in
             if let heif = resources.first(where: { $0.kind == .processedHEIF }),
                let image = UIImage(data: heif.data) {
-                lastThumbnail = image
+                withAnimation(Theme.motion(Theme.springBouncy)) {
+                    lastThumbnail = image
+                    thumbnailID += 1
+                }
             }
             Task { await store.store(resources) }
         }
+    }
+}
+
+/// Shutter button press feedback: scales down while pressed, springing back on release.
+private struct ShutterButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.9 : 1)
+            .animation(Theme.motion(Theme.springBouncy), value: configuration.isPressed)
     }
 }
