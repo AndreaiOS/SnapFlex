@@ -1,6 +1,6 @@
 public struct ChromeVisibility: Equatable, Sendable {
     public enum State: Equatable, Sendable { case full, minimal }
-    public static let idleSeconds: Double = 2.0
+    public static let idleSeconds: Double = 4.0
 
     public private(set) var state: State = .full
     private var lastInteraction: Double = 0

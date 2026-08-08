@@ -3,24 +3,26 @@ import Testing
 
 @Suite struct ChromeVisibilityTests {
     @Test func hidesAfterIdleDelay() {
+        let idle = ChromeVisibility.idleSeconds
         var chrome = ChromeVisibility()
         chrome.interaction(at: 10)
-        chrome.tick(now: 11.9)
+        chrome.tick(now: 10 + idle - 0.1)
         #expect(chrome.state == .full)
-        chrome.tick(now: 12.0)
+        chrome.tick(now: 10 + idle)
         #expect(chrome.state == .minimal)
     }
 
     @Test func interactionRevealsAndRearms() {
+        let idle = ChromeVisibility.idleSeconds
         var chrome = ChromeVisibility()
         chrome.interaction(at: 0)
-        chrome.tick(now: 5)
+        chrome.tick(now: idle + 1)
         #expect(chrome.state == .minimal)
-        chrome.interaction(at: 6)
+        chrome.interaction(at: idle + 2)
         #expect(chrome.state == .full)
-        chrome.tick(now: 7.5)
+        chrome.tick(now: idle + 2 + idle - 0.5)
         #expect(chrome.state == .full)
-        chrome.tick(now: 8.0)
+        chrome.tick(now: idle + 2 + idle)
         #expect(chrome.state == .minimal)
     }
 
@@ -50,11 +52,12 @@ import Testing
     }
 
     @Test func needsInteractionTrueWhenMinimal() {
+        let idle = ChromeVisibility.idleSeconds
         var chrome = ChromeVisibility()
         chrome.interaction(at: 0)
-        chrome.tick(now: 5)
+        chrome.tick(now: idle + 1)
         #expect(chrome.state == .minimal)
-        #expect(chrome.needsInteraction(at: 5.1) == true)
+        #expect(chrome.needsInteraction(at: idle + 1.1) == true)
     }
 
     @Test func needsInteractionTrueWhenInteractionStale() {
