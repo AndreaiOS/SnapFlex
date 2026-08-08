@@ -47,3 +47,12 @@ not work in the simulator).
 - [ ] RAW + HEIF companion honors the PROC level on the companion
 - [ ] PROC level survives lens switches
 - [ ] PROC persistence across app restarts NOT required (resets to STD)
+- [ ] Chrome fades out after 2s idle; tap reveals with a bounce
+- [ ] Chrome never hides while dial open, LONG running, or countdown active
+- [ ] Minimal HUD readout matches active settings (e.g. "ISO 200 · 1/120 · ND 15s")
+- [ ] Dial has momentum and snaps to stops with tick haptics
+- [ ] Values morph digits; selection capsule slides between tiles
+- [ ] Shutter press bounces; capture and LONG-complete haptics fire
+- [ ] Reduce Motion ON: crossfades instead of springs, auto-hide still works
+- [ ] Dial momentum feels right on hardware (friction/stop threshold tuning)
+- [ ] Selection capsule and thumbnail pop behave correctly under device rotation and with Reduce Motion ON
