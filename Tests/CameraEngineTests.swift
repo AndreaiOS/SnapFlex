@@ -69,6 +69,14 @@ import SnapFlexCore
                 CaptureRecipe(raw: .proRAW, includeProcessed: true, bracketing: nil))
     }
 
+    @Test func captureCarriesProcessingLevel() {
+        let (engine, device) = makeEngine()
+        engine.formatSelection = FormatSelection(raw: .off, heifCompanion: false)
+        engine.processingLevel = .max
+        engine.capture { _ in }
+        #expect(device.capturedRecipes.last?.processing == .max)
+    }
+
     @Test func captureWithBracketingUsesManualBaseWhenManual() {
         let (engine, device) = makeEngine()
         engine.formatSelection = FormatSelection(raw: .off, heifCompanion: false)

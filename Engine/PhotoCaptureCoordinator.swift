@@ -52,6 +52,11 @@ final class PhotoCaptureCoordinator: NSObject, AVCapturePhotoCaptureDelegate {
         }
         if !(settings is AVCapturePhotoBracketSettings) {
             settings.flashMode = flashOn ? .on : .off
+            settings.photoQualityPrioritization = switch recipe.processing {
+            case .zero: .speed
+            case .standard: .balanced
+            case .max: .quality
+            }
         }
         return settings
     }

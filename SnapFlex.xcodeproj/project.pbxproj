@@ -59,7 +59,7 @@
 		00957AB69B137CAEF89B5036 /* LongExposureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureController.swift; sourceTree = "<group>"; };
 		0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeCameraDevice.swift; sourceTree = "<group>"; };
 		0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngineTests.swift; sourceTree = "<group>"; };
-		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13C99BD62261A95AF8B74598 /* LongExposureAccumulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureAccumulator.swift; sourceTree = "<group>"; };
 		15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPipeline.swift; sourceTree = "<group>"; };
 		19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPreviewMetalView.swift; sourceTree = "<group>"; };
@@ -83,7 +83,7 @@
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		A175F8825986D9B794759E53 /* PermissionGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionGate.swift; sourceTree = "<group>"; };
 		B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongAccumulatorTests.swift; sourceTree = "<group>"; };
-		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
+		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Core; sourceTree = SOURCE_ROOT; };
 		BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridLevelOverlay.swift; sourceTree = "<group>"; };
 		BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterBar.swift; sourceTree = "<group>"; };
 		C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapFlexApp.swift; sourceTree = "<group>"; };
@@ -257,8 +257,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = FE9B5589799F78A307F665C7 /* Build configuration list for PBXProject "SnapFlex" */;
 			developmentRegion = en;
@@ -378,6 +376,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RA4VQQK3U6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SnapFlex needs the camera to take photos.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "SnapFlex saves your photos to your library.";
@@ -464,6 +463,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RA4VQQK3U6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SnapFlex needs the camera to take photos.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "SnapFlex saves your photos to your library.";

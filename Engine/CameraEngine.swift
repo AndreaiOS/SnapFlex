@@ -22,6 +22,7 @@ final class CameraEngine {
     private(set) var histogramBins: [UInt32]?
 
     var formatSelection = FormatSelection(raw: .proRAW, heifCompanion: true)
+    var processingLevel: ProcessingLevel = .standard
     var bracketCount: Int?          // nil = off; 3 or 5
     var bracketStepEV: Float = 1.0
     var flashOn = false
@@ -170,7 +171,8 @@ final class CameraEngine {
         }
         let recipe = CaptureRecipe.make(selection: formatSelection,
                                         capabilities: capabilities,
-                                        bracketing: bracketing)
+                                        bracketing: bracketing,
+                                        processing: processingLevel)
         device.capture(recipe: recipe, flashOn: flashOn) { [weak self] resources in
             Task { @MainActor in
                 self?.lastCapture = resources
