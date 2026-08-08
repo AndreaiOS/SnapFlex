@@ -50,41 +50,46 @@ struct TopBar: View {
     var longAvailable: Bool = true
 
     var body: some View {
-        HStack(spacing: 8) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    chip(engine.formatSelection.raw.rawValue,
-                         highlighted: engine.formatSelection.raw != .off) { cycleFormat() }
-                    chip(engine.processingLevel.rawValue) { engine.processingLevel = engine.processingLevel.next }
-                    chip("FLASH", highlighted: engine.flashOn) { engine.flashOn.toggle() }
-                    chip(aspect.label) { aspect = next(aspect, in: AspectRatio.allCases) }
-                    chip(timerDuration == 0 ? "TIMER" : "\(timerDuration)s",
-                         highlighted: timerDuration > 0) {
-                        timerDuration = timerDuration == 0 ? 3 : timerDuration == 3 ? 10 : 0
+        // Two semantic rows, no scrolling: row 1 is the image pipeline
+        // (format, processing, flash, timer), row 2 the shooting modes.
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                chip(engine.formatSelection.raw.rawValue,
+                     highlighted: engine.formatSelection.raw != .off) { cycleFormat() }
+                chip(engine.processingLevel.rawValue) { engine.processingLevel = engine.processingLevel.next }
+                chip("FLASH", highlighted: engine.flashOn) { engine.flashOn.toggle() }
+                chip(timerDuration == 0 ? "TIMER" : "\(timerDuration)s",
+                     highlighted: timerDuration > 0) {
+                    timerDuration = timerDuration == 0 ? 3 : timerDuration == 3 ? 10 : 0
+                }
+                Spacer()
+                assistMenu
+            }
+            HStack(spacing: 6) {
+                chip(aspect.label) { aspect = next(aspect, in: AspectRatio.allCases) }
+                chip(engine.bracketCount.map { "BKT \($0)" } ?? "BKT",
+                     highlighted: engine.bracketCount != nil) {
+                    engine.bracketCount = engine.bracketCount == nil ? 3
+                        : engine.bracketCount == 3 ? 5 : nil
+                }
+                if longAvailable {
+                    chip(engine.longMode.label, highlighted: engine.longMode != .off) {
+                        engine.longMode = engine.longMode.next
                     }
-                    chip(engine.bracketCount.map { "BKT \($0)" } ?? "BKT",
-                         highlighted: engine.bracketCount != nil) {
-                        engine.bracketCount = engine.bracketCount == nil ? 3
-                            : engine.bracketCount == 3 ? 5 : nil
-                    }
-                    if longAvailable {
-                        chip(engine.longMode.label, highlighted: engine.longMode != .off) {
-                            engine.longMode = engine.longMode.next
-                        }
-                        if engine.longMode != .off {
-                            chip(engine.longBlend.rawValue, highlighted: true) {
-                                engine.longBlend = engine.longBlend == .nd ? .trails : .nd
-                            }
+                    if engine.longMode != .off {
+                        chip(engine.longBlend.rawValue, highlighted: true) {
+                            engine.longBlend = engine.longBlend == .nd ? .trails : .nd
                         }
                     }
                 }
-                .padding(.vertical, 2)
+                Spacer()
             }
-            assistMenu
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Theme.chrome)
+        .background(
+            LinearGradient(colors: [.black.opacity(0.78), .black.opacity(0.45)],
+                           startPoint: .top, endPoint: .bottom))
     }
 
     private func chip(_ text: String, highlighted: Bool = false,

@@ -20,4 +20,9 @@ enum Haptics {
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
     }
+
+    static func error() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.error)
+    }
 }

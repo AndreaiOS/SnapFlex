@@ -53,6 +53,8 @@ struct ViewfinderScreen: View {
     @State private var chromeTask: Task<Void, Never>?
     @State private var photosDenied = false
     @State private var pendingSaves = 0
+    @State private var captureInFlight = false
+    @State private var captureFailed = false
     @Environment(\.scenePhase) private var scenePhase
 
     private var isLongExposing: Bool { longController?.isExposing == true }
@@ -194,9 +196,26 @@ struct ViewfinderScreen: View {
                     .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
+
+            if captureFailed {
+                Text("CAPTURE FAILED")
+                    .font(Theme.valueFont(11))
+                    .tracking(0.5)
+                    .foregroundStyle(Theme.warning)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(Color.black.opacity(0.65)))
+                    .overlay(Capsule().strokeBorder(Theme.warning.opacity(0.5), lineWidth: 1))
+                    .rotatesWithDevice(orientation.uiAngle)
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 44)
+            }
         }
         .statusBarHidden()
         .onAppear {
+            loadSettings()
             orientation.start()
             refreshSaveState()
             chrome.blocked = chromeBlocked
@@ -235,6 +254,12 @@ struct ViewfinderScreen: View {
         .onChange(of: engine.status) { _, status in
             if status == .interrupted { longController?.interrupted() }
         }
+        .onChange(of: engine.formatSelection) { _, _ in saveSettings() }
+        .onChange(of: engine.processingLevel) { _, _ in saveSettings() }
+        .onChange(of: aspect) { _, _ in saveSettings() }
+        .onChange(of: timerDuration) { _, _ in saveSettings() }
+        .onChange(of: showGrid) { _, _ in saveSettings() }
+        .onChange(of: showLevel) { _, _ in saveSettings() }
         .onReceive(NotificationCenter.default.publisher(for: ProcessInfo.thermalStateDidChangeNotification)) { _ in
             if ProcessInfo.processInfo.thermalState == .serious || ProcessInfo.processInfo.thermalState == .critical {
                 longController?.interrupted()
@@ -284,6 +309,43 @@ struct ViewfinderScreen: View {
     private func refreshSaveState() {
         photosDenied = store.saveBlocked
         pendingSaves = store.spooledCount
+    }
+
+    private func loadSettings() {
+        let defaults = UserDefaults.standard
+        if let raw = defaults.string(forKey: "settings.rawMode"),
+           let mode = RAWMode(rawValue: raw) {
+            engine.formatSelection.raw = mode
+        }
+        if defaults.object(forKey: "settings.heifCompanion") != nil {
+            engine.formatSelection.heifCompanion = defaults.bool(forKey: "settings.heifCompanion")
+        }
+        if let proc = defaults.string(forKey: "settings.processing"),
+           let level = ProcessingLevel(rawValue: proc) {
+            engine.processingLevel = level
+        }
+        if defaults.object(forKey: "settings.aspect") != nil {
+            let index = defaults.integer(forKey: "settings.aspect")
+            if AspectRatio.allCases.indices.contains(index) {
+                aspect = AspectRatio.allCases[index]
+            }
+        }
+        if defaults.object(forKey: "settings.timer") != nil {
+            timerDuration = defaults.integer(forKey: "settings.timer")
+        }
+        showGrid = defaults.bool(forKey: "settings.grid")
+        showLevel = defaults.bool(forKey: "settings.level")
+    }
+
+    private func saveSettings() {
+        let defaults = UserDefaults.standard
+        defaults.set(engine.formatSelection.raw.rawValue, forKey: "settings.rawMode")
+        defaults.set(engine.formatSelection.heifCompanion, forKey: "settings.heifCompanion")
+        defaults.set(engine.processingLevel.rawValue, forKey: "settings.processing")
+        defaults.set(AspectRatio.allCases.firstIndex(of: aspect) ?? 0, forKey: "settings.aspect")
+        defaults.set(timerDuration, forKey: "settings.timer")
+        defaults.set(showGrid, forKey: "settings.grid")
+        defaults.set(showLevel, forKey: "settings.level")
     }
 
     private var bottomRow: some View {
@@ -343,6 +405,20 @@ struct ViewfinderScreen: View {
             }
             Spacer()
             HStack(spacing: 6) {
+                Button {
+                    engine.setZoom(1)
+                    zoomBase = 1
+                } label: {
+                    Text(String(format: "%.1f\u{00D7}", zoomBase))
+                        .font(Theme.valueFont(11))
+                        .foregroundStyle(zoomBase == 1 ? .white : Theme.accent)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 5)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Capsule())
+                        .rotatesWithDevice(orientation.uiAngle)
+                }
+                .buttonStyle(.plain)
                 ForEach(engine.availableLenses, id: \.self) { lens in
                     Button {
                         engine.selectLens(lens)
@@ -370,6 +446,7 @@ struct ViewfinderScreen: View {
     }
 
     func takePhoto() {
+        guard engine.status != .interrupted else { return }
         chromeInteraction()
         if let longController, engine.longMode != .off || longController.isExposing {
             countdownTask?.cancel()
@@ -439,12 +516,19 @@ struct ViewfinderScreen: View {
     }
 
     private func performCapture() {
+        guard !captureInFlight else { return }
+        captureInFlight = true
         Haptics.medium()
         withAnimation(.easeOut(duration: 0.1)) { shutterFlash = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
             withAnimation(.easeIn(duration: 0.15)) { shutterFlash = false }
         }
         engine.capture { resources in
+            captureInFlight = false
+            guard !resources.isEmpty else {
+                showCaptureFailed()
+                return
+            }
             if let heif = resources.first(where: { $0.kind == .processedHEIF }),
                let image = UIImage(data: heif.data) {
                 withAnimation(Theme.motion(Theme.springBouncy)) {
@@ -456,6 +540,15 @@ struct ViewfinderScreen: View {
                 await store.store(resources)
                 refreshSaveState()
             }
+        }
+    }
+
+    private func showCaptureFailed() {
+        Haptics.error()
+        withAnimation(Theme.motion(Theme.springStandard)) { captureFailed = true }
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            withAnimation(Theme.motion(Theme.springStandard)) { captureFailed = false }
         }
     }
 }

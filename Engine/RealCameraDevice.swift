@@ -44,6 +44,18 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
         NotificationCenter.default.addObserver(
             self, selector: #selector(sessionResumed),
             name: AVCaptureSession.interruptionEndedNotification, object: session)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(sessionRuntimeError),
+            name: AVCaptureSession.runtimeErrorNotification, object: session)
+    }
+
+    /// Media services can reset underneath us (thermal events, daemon crashes);
+    /// try to restart instead of leaving a frozen preview.
+    @objc private func sessionRuntimeError() {
+        sessionQueue.async { [self] in
+            if !session.isRunning { session.startRunning() }
+            notifyStatus(session.isRunning ? .running : .interrupted)
+        }
     }
 
     @objc private func sessionInterrupted() { notifyStatus(.interrupted) }
