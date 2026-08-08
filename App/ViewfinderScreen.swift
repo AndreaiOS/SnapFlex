@@ -23,6 +23,8 @@ struct ViewfinderScreen: View {
     @State private var longController = LongExposureController()
     @Environment(\.scenePhase) private var scenePhase
 
+    private var isLongExposing: Bool { longController?.isExposing == true }
+
     var body: some View {
         ZStack {
             PreviewView(session: session, onCaptureEvent: { takePhoto() })
@@ -75,6 +77,8 @@ struct ViewfinderScreen: View {
                        showGrid: $showGrid, showLevel: $showLevel,
                        rotation: orientation.uiAngle,
                        longAvailable: longController != nil)
+                    .disabled(isLongExposing)
+                    .opacity(isLongExposing ? 0.4 : 1)
                 if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
                     HStack {
                         Spacer()
@@ -86,13 +90,17 @@ struct ViewfinderScreen: View {
                     LongExposureHUD(controller: longController)
                         .padding(.bottom, 4)
                 }
-                if let parameter = selected {
-                    ParameterDial(engine: engine, parameter: parameter)
+                Group {
+                    if let parameter = selected {
+                        ParameterDial(engine: engine, parameter: parameter)
+                    }
+                    ParameterBar(engine: engine, selected: $selected,
+                                 rotation: orientation.uiAngle)
+                        .padding(.vertical, 8)
+                        .background(Theme.chrome)
                 }
-                ParameterBar(engine: engine, selected: $selected,
-                             rotation: orientation.uiAngle)
-                    .padding(.vertical, 8)
-                    .background(Theme.chrome)
+                .disabled(isLongExposing)
+                .opacity(isLongExposing ? 0.4 : 1)
                 bottomRow
                     .padding(.vertical, 10)
                     .background(Theme.chrome)
@@ -143,6 +151,8 @@ struct ViewfinderScreen: View {
                 .rotatesWithDevice(orientation.uiAngle)
             }
             .buttonStyle(.plain)
+            .disabled(isLongExposing)
+            .opacity(isLongExposing ? 0.4 : 1)
             Spacer()
             ZStack {
                 if let longController, longController.isExposing {
@@ -177,12 +187,17 @@ struct ViewfinderScreen: View {
                     .buttonStyle(.plain)
                 }
             }
+            .disabled(isLongExposing)
+            .opacity(isLongExposing ? 0.4 : 1)
         }
         .padding(.horizontal, 20)
     }
 
     func takePhoto() {
         if let longController, engine.longMode != .off || longController.isExposing {
+            countdownTask?.cancel()
+            countdownTask = nil
+            countdown = nil
             if longController.isExposing {
                 longController.shutterTapped()
             } else {

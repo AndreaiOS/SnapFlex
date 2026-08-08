@@ -66,6 +66,7 @@ struct LongExposureHUD: View {
 /// progress, so it draws nothing here (the HUD's "BULB" label communicates it).
 struct LongExposureShutterRing: View {
     let controller: LongExposureController
+    @State private var spin = false
 
     var body: some View {
         if let progress = controller.progress {
@@ -74,6 +75,17 @@ struct LongExposureShutterRing: View {
                 .stroke(Theme.accent, style: .init(lineWidth: 4, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .frame(width: 84, height: 84)
+        } else {
+            Circle()
+                .trim(from: 0, to: 0.25)
+                .stroke(Theme.accent, style: .init(lineWidth: 4, lineCap: .round))
+                .frame(width: 84, height: 84)
+                .rotationEffect(.degrees(spin ? 360 : 0))
+                .onAppear {
+                    withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+                        spin = true
+                    }
+                }
         }
     }
 }
