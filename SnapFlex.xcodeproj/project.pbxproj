@@ -49,7 +49,7 @@
 /* Begin PBXFileReference section */
 		0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeCameraDevice.swift; sourceTree = "<group>"; };
 		0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngineTests.swift; sourceTree = "<group>"; };
-		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPipeline.swift; sourceTree = "<group>"; };
 		2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewfinderScreen.swift; sourceTree = "<group>"; };
 		327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinator.swift; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		A175F8825986D9B794759E53 /* PermissionGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionGate.swift; sourceTree = "<group>"; };
-		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
+		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Core; sourceTree = SOURCE_ROOT; };
 		BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridLevelOverlay.swift; sourceTree = "<group>"; };
 		BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterBar.swift; sourceTree = "<group>"; };
 		C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapFlexApp.swift; sourceTree = "<group>"; };
@@ -222,8 +222,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = FE9B5589799F78A307F665C7 /* Build configuration list for PBXProject "SnapFlex" */;
 			developmentRegion = en;
@@ -334,6 +332,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RA4VQQK3U6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SnapFlex needs the camera to take photos.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "SnapFlex saves your photos to your library.";
@@ -344,7 +343,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.socialsprint.SnapFlex;
+				PRODUCT_BUNDLE_IDENTIFIER = co.SnapFlex;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -420,6 +419,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RA4VQQK3U6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SnapFlex needs the camera to take photos.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "SnapFlex saves your photos to your library.";
@@ -430,7 +430,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.socialsprint.SnapFlex;
+				PRODUCT_BUNDLE_IDENTIFIER = co.SnapFlex;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
