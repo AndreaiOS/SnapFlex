@@ -35,6 +35,7 @@
 		BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */; };
 		CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */; };
 		D8CD8F617A9A903B42031249 /* CaptureStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */; };
+		DABA603F82293BE87F1A0236 /* LongPreviewMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */; };
 		DC7246D978A486118FAF2C2C /* OverlayPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */; };
 		E2373E9C1CAC9A8D74EC3F5C /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C3AFC05BB91ED93F7640B /* PreviewView.swift */; };
 		E4705DE7239E225FA24A05EF /* LongAccumulatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */; };
@@ -60,6 +61,7 @@
 		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13C99BD62261A95AF8B74598 /* LongExposureAccumulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureAccumulator.swift; sourceTree = "<group>"; };
 		15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPipeline.swift; sourceTree = "<group>"; };
+		19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPreviewMetalView.swift; sourceTree = "<group>"; };
 		2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewfinderScreen.swift; sourceTree = "<group>"; };
 		327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinator.swift; sourceTree = "<group>"; };
 		32CA4EF3B4BF9DA85E164C13 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 				7C025B67D84EDEB54171BE9F /* Assets.xcassets */,
 				BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */,
 				3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */,
+				19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */,
 				5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */,
 				621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */,
 				BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */,
@@ -301,6 +304,7 @@
 				621CCED423DBF124DEA90B41 /* LongExposureAccumulator.swift in Sources */,
 				4B6CC2E95068B4C7FAE487E4 /* LongExposureController.swift in Sources */,
 				CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */,
+				DABA603F82293BE87F1A0236 /* LongPreviewMetalView.swift in Sources */,
 				EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */,
 				BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */,
 				623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */,
