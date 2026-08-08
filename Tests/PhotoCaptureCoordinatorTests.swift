@@ -57,7 +57,7 @@ import SnapFlexCore
     @Test func bracketSettingsSkipPrioritization() {
         let recipe = CaptureRecipe(raw: RAWKind.none, includeProcessed: true,
                                    bracketing: .autoExposure(biases: [-1, 0, 1]), processing: .max)
-        _ = PhotoCaptureCoordinator.makeSettings(recipe: recipe, rawType: nil, flashOn: false)
-        // constructing must not trap; bracket settings keep their default prioritization
+        let settings = PhotoCaptureCoordinator.makeSettings(recipe: recipe, rawType: nil, flashOn: false)
+        #expect(settings.photoQualityPrioritization == .speed)
     }
 }

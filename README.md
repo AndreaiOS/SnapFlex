@@ -45,4 +45,5 @@ not work in the simulator).
 - [ ] AE stays locked during the exposure (no brightness pumping in preview)
 - [ ] PROC 0AI vs MAX on a detailed scene shows visibly different processing
 - [ ] RAW + HEIF companion honors the PROC level on the companion
-- [ ] PROC level survives lens switches and app restarts is NOT required (resets to STD)
+- [ ] PROC level survives lens switches
+- [ ] PROC persistence across app restarts NOT required (resets to STD)
