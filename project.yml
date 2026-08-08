@@ -17,6 +17,7 @@ targets:
       base:
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"
+        DEVELOPMENT_TEAM: RA4VQQK3U6
         INFOPLIST_KEY_NSCameraUsageDescription: "SnapFlex needs the camera to take photos."
         INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "SnapFlex saves your photos to your library."
         INFOPLIST_KEY_UILaunchScreen_Generation: YES

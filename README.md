@@ -43,3 +43,6 @@ not work in the simulator).
 - [ ] Backgrounding mid-exposure saves the partial result (if ≥ 1s)
 - [ ] Shake warning appears handheld, absent on tripod
 - [ ] AE stays locked during the exposure (no brightness pumping in preview)
+- [ ] PROC 0AI vs MAX on a detailed scene shows visibly different processing
+- [ ] RAW + HEIF companion honors the PROC level on the companion
+- [ ] PROC level survives lens switches and app restarts is NOT required (resets to STD)

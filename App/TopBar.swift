@@ -52,6 +52,7 @@ struct TopBar: View {
     var body: some View {
         HStack(spacing: 8) {
             chip(engine.formatSelection.raw.rawValue) { cycleFormat() }
+            chip(engine.processingLevel.rawValue) { engine.processingLevel = engine.processingLevel.next }
             chip(engine.flashOn ? "FLASH ON" : "FLASH OFF") { engine.flashOn.toggle() }
             chip(aspect.label) { aspect = next(aspect, in: AspectRatio.allCases) }
             chip(timerDuration == 0 ? "TIMER OFF" : "\(timerDuration)s") {
