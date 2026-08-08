@@ -18,6 +18,7 @@ struct ViewfinderScreen: View {
     @State private var countdown: Int?
     @State private var countdownTask: Task<Void, Never>?
     @State private var lastThumbnail: UIImage?
+    @State private var zoomBase: Double = 1
 
     var body: some View {
         ZStack {
@@ -78,6 +79,17 @@ struct ViewfinderScreen: View {
             }
         }
         .statusBarHidden()
+        .gesture(
+            MagnifyGesture()
+                .onChanged { value in
+                    engine.setZoom(zoomBase * value.magnification)
+                }
+                .onEnded { value in
+                    zoomBase = min(max(zoomBase * value.magnification,
+                                       engine.ranges.zoom.lowerBound),
+                                   engine.ranges.zoom.upperBound)
+                }
+        )
     }
 
     private var bottomRow: some View {
