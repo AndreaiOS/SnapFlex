@@ -6,7 +6,9 @@ struct SnapFlexApp: App {
     private let driver = OverlayFrameDriver()
     private let store = CaptureStore(
         library: PhotoKitLibrary(),
-        spoolDirectory: FileManager.default.temporaryDirectory.appendingPathComponent("spool"))
+        spoolDirectory: FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("spool"))
     @State private var engine: CameraEngine
     @Environment(\.scenePhase) private var scenePhase
 
@@ -22,6 +24,7 @@ struct SnapFlexApp: App {
                 ViewfinderScreen(engine: engine, session: device.session,
                                  driver: driver, store: store)
                     .onAppear { engine.start() }
+                    .task { await store.flushSpool() }
             }
             .preferredColorScheme(.dark)
         }

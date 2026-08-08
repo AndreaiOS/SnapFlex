@@ -6,8 +6,12 @@ final class FakePhotoLibrary: PhotoLibraryProtocol {
     var isAuthorized = true
     var saved: [[CaptureResource]] = []
     var failNextSave = false
+    var grantsOnRequest = false
 
-    func requestAuthorization() async -> Bool { isAuthorized }
+    func requestAuthorization() async -> Bool {
+        if grantsOnRequest { isAuthorized = true }
+        return grantsOnRequest
+    }
     func save(_ resources: [CaptureResource]) async throws {
         if !isAuthorized || failNextSave {
             failNextSave = false
@@ -41,6 +45,14 @@ final class FakePhotoLibrary: PhotoLibraryProtocol {
         await store.store(sample)
         #expect(library.saved.isEmpty)
         #expect(store.spooledCount == 1)
+    }
+
+    @Test func requestsAuthorizationWhenNotDetermined() async {
+        let (store, library, _) = makeStore(authorized: false)
+        library.grantsOnRequest = true
+        await store.store(sample)
+        #expect(library.saved.count == 1)
+        #expect(store.spooledCount == 0)
     }
 
     @Test func flushMovesSpoolToLibrary() async {

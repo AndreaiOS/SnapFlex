@@ -64,6 +64,12 @@ final class CaptureStore {
 
     func store(_ resources: [CaptureResource]) async {
         guard !resources.isEmpty else { return }
+        if !library.isAuthorized {
+            let granted = await library.requestAuthorization()
+            if granted {
+                await flushSpool()
+            }
+        }
         do {
             guard library.isAuthorized else { throw CocoaError(.fileWriteNoPermission) }
             try await library.save(resources)
