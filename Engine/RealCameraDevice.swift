@@ -19,6 +19,10 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     var onStatusChange: ((SessionStatus) -> Void)?
     var onControlEvent: ((CameraControlEvent) -> Void)?
     private(set) var activeLens: LensKind = .wide
+    // Created on the main queue (it touches UIKit state synchronously at init;
+    // creating it on sessionQueue deadlocks against start()'s sync barrier),
+    // read on sessionQueue at capture time — hence the lock.
+    private let coordinatorLock = NSLock()
     private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
 
     override init() {
@@ -114,7 +118,13 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
             currentInput = input
             currentDevice = device
             activeLens = lens
-            rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+            DispatchQueue.main.async { [weak self] in
+                let coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+                guard let self else { return }
+                self.coordinatorLock.lock()
+                self.rotationCoordinator = coordinator
+                self.coordinatorLock.unlock()
+            }
         }
     }
 
@@ -298,8 +308,11 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
                 self?.sessionQueue.async { self?.activeCoordinators[id] = nil }
             }
             activeCoordinators[id] = coordinator
-            if let coordinator = rotationCoordinator {
-                let angle = coordinator.videoRotationAngleForHorizonLevelCapture
+            coordinatorLock.lock()
+            let rotation = rotationCoordinator
+            coordinatorLock.unlock()
+            if let rotation {
+                let angle = rotation.videoRotationAngleForHorizonLevelCapture
                 if let connection = photoOutput.connection(with: .video),
                    connection.isVideoRotationAngleSupported(angle) {
                     connection.videoRotationAngle = angle
