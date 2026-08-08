@@ -1,6 +1,6 @@
 name: SnapFlex
 options:
-  bundleIdPrefix: co.socialsprint
+  bundleIdPrefix: co
   deploymentTarget:
     iOS: "18.0"
 packages:

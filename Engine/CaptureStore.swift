@@ -48,7 +48,7 @@ final class CaptureStore {
     private let library: PhotoLibraryProtocol
     private let spoolDirectory: URL
     private let fileManager = FileManager.default
-    private let logger = Logger(subsystem: "co.socialsprint.snapflex", category: "capture-store")
+    private let logger = Logger(subsystem: "co.SnapFlex", category: "capture-store")
 
     init(library: PhotoLibraryProtocol, spoolDirectory: URL) {
         self.library = library

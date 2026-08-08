@@ -6,8 +6,8 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     let session = AVCaptureSession()
     let photoOutput = AVCapturePhotoOutput()
     let videoOutput = AVCaptureVideoDataOutput()
-    private let sessionQueue = DispatchQueue(label: "co.socialsprint.snapflex.session")
-    private let videoQueue = DispatchQueue(label: "co.socialsprint.snapflex.video")
+    private let sessionQueue = DispatchQueue(label: "co.SnapFlex.session")
+    private let videoQueue = DispatchQueue(label: "co.SnapFlex.video")
     private let frameHandlerLock = NSLock()
 
     private var devicesByLens: [LensKind: AVCaptureDevice] = [:]
