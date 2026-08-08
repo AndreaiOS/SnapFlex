@@ -202,13 +202,21 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
 
     func setExposure(iso: Float?, shutterSeconds: Double?, bias: Float) {
         withLockedDevice { device in
+            // Clamp against the ACTUAL device at apply time: engine-side ranges can be
+            // stale across an async lens switch, and out-of-range values make
+            // setExposureModeCustom throw NSRangeException on device.
+            let format = device.activeFormat
             if let iso, let shutterSeconds {
-                let duration = CMTime(seconds: shutterSeconds, preferredTimescale: 1_000_000)
-                device.setExposureModeCustom(duration: duration, iso: iso, completionHandler: nil)
+                let safeISO = min(max(iso, format.minISO), format.maxISO)
+                let safeSeconds = min(max(shutterSeconds, format.minExposureDuration.seconds),
+                                      format.maxExposureDuration.seconds)
+                let duration = CMTime(seconds: safeSeconds, preferredTimescale: 1_000_000)
+                device.setExposureModeCustom(duration: duration, iso: safeISO, completionHandler: nil)
             } else if device.isExposureModeSupported(.continuousAutoExposure) {
                 device.exposureMode = .continuousAutoExposure
             }
-            device.setExposureTargetBias(bias, completionHandler: nil)
+            let safeBias = min(max(bias, device.minExposureTargetBias), device.maxExposureTargetBias)
+            device.setExposureTargetBias(safeBias, completionHandler: nil)
         }
     }
 
@@ -249,7 +257,8 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
 
     func setZoom(_ factor: Double) {
         withLockedDevice { device in
-            device.videoZoomFactor = factor
+            // Same stale-range hazard as exposure: clamp to the actual device.
+            device.videoZoomFactor = min(max(factor, 1.0), device.activeFormat.videoMaxZoomFactor)
         }
     }
 
@@ -321,6 +330,25 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
                     .first { AVCapturePhotoOutput.isBayerRAWPixelFormat($0) }
             case .none:
                 nil
+            }
+            let isBayer = rawType.map { AVCapturePhotoOutput.isBayerRAWPixelFormat($0) } ?? false
+            // Bayer RAW rules (AVCapturePhotoOutput.h): re-clamp manual bracket values
+            // to the actual device, and videoZoomFactor must be exactly 1.0 or
+            // capturePhoto throws NSInvalidArgumentException.
+            if case .manual(let exposures) = recipe.bracketing, let device = currentDevice {
+                let format = device.activeFormat
+                recipe.bracketing = .manual(exposures: exposures.map {
+                    ManualBracketExposure(
+                        iso: min(max($0.iso, format.minISO), format.maxISO),
+                        shutterSeconds: min(max($0.shutterSeconds,
+                                                format.minExposureDuration.seconds),
+                                            format.maxExposureDuration.seconds))
+                })
+            }
+            if isBayer, let device = currentDevice, device.videoZoomFactor != 1.0,
+               (try? device.lockForConfiguration()) != nil {
+                device.videoZoomFactor = 1.0
+                device.unlockForConfiguration()
             }
             let settings = PhotoCaptureCoordinator.makeSettings(
                 recipe: recipe, rawType: rawType, flashOn: flashOn)

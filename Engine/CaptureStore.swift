@@ -69,6 +69,8 @@ final class CaptureStore {
     private let spoolDirectory: URL
     private let fileManager = FileManager.default
     private let logger = Logger(subsystem: "co.SnapFlex", category: "capture-store")
+    private let flushGuard = NSLock()
+    private var isFlushing = false
 
     init(library: PhotoLibraryProtocol, spoolDirectory: URL) {
         self.library = library
@@ -134,6 +136,14 @@ final class CaptureStore {
     }
 
     func flushSpool() async {
+        // Non-reentrant: launch .task, scenePhase and post-grant store() can all
+        // trigger a flush concurrently; two flushes of the same group would save
+        // duplicate assets.
+        flushGuard.lock()
+        if isFlushing { flushGuard.unlock(); return }
+        isFlushing = true
+        flushGuard.unlock()
+        defer { flushGuard.lock(); isFlushing = false; flushGuard.unlock() }
         guard library.isAuthorized,
               let allGroups = try? fileManager.contentsOfDirectory(
                   at: spoolDirectory, includingPropertiesForKeys: nil) else { return }

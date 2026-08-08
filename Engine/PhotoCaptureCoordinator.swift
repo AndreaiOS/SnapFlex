@@ -62,7 +62,12 @@ final class PhotoCaptureCoordinator: NSObject, AVCapturePhotoCaptureDelegate {
                 case .standard: .balanced
                 case .max: .quality
                 }
+            } else if recipe.raw == .bayer {
+                // Bayer RAW rules (AVCapturePhotoOutput.h): prioritization MUST be
+                // .speed — even the default .balanced is rejected at capturePhoto.
+                settings.photoQualityPrioritization = .speed
             }
+            // ProRAW: leave the default untouched; elevated values throw at set time.
         }
         return settings
     }
