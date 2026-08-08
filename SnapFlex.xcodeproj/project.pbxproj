@@ -33,6 +33,7 @@
 		DC7246D978A486118FAF2C2C /* OverlayPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */; };
 		E2373E9C1CAC9A8D74EC3F5C /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C3AFC05BB91ED93F7640B /* PreviewView.swift */; };
 		F15A41226521D1EE15BE509D /* ViewfinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */; };
+		F76A868A2066FB9E9A8C2F42 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C025B67D84EDEB54171BE9F /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		537E1319B1EEC5386E46AF9B /* CameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDevice.swift; sourceTree = "<group>"; };
 		621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayMetalView.swift; sourceTree = "<group>"; };
 		62A3D069FD29E60E67240457 /* OverlayFrameDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayFrameDriver.swift; sourceTree = "<group>"; };
+		7C025B67D84EDEB54171BE9F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8170FBCBCE94A76D4EE06E7C /* TopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 		FA9972BB87381D975C074754 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				7C025B67D84EDEB54171BE9F /* Assets.xcassets */,
 				BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */,
 				3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */,
 				621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */,
@@ -178,6 +181,7 @@
 			buildConfigurationList = F468B23DABBB26EE51349C9C /* Build configuration list for PBXNativeTarget "SnapFlex" */;
 			buildPhases = (
 				5B0F64398D6467BBD9AE4B20 /* Sources */,
+				BBD95D86C487B47AA3CE7B84 /* Resources */,
 				CE385D1742ADD1B40B055F38 /* Frameworks */,
 			);
 			buildRules = (
@@ -243,6 +247,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BBD95D86C487B47AA3CE7B84 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F76A868A2066FB9E9A8C2F42 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5B0F64398D6467BBD9AE4B20 /* Sources */ = {
