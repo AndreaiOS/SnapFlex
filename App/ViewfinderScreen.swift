@@ -20,11 +20,20 @@ struct ViewfinderScreen: View {
     @State private var lastThumbnail: UIImage?
     @State private var zoomBase: Double = 1
     @State private var orientation = OrientationModel()
+    @State private var longController = LongExposureController()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
             PreviewView(session: session, onCaptureEvent: { takePhoto() })
                 .ignoresSafeArea()
+            if let longController, longController.isExposing {
+                LongPreviewMetalView(controller: longController)
+                    .aspectRatio(3.0 / 4.0, contentMode: .fit)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
             if let driver, engine.overlaySettings.peakingEnabled || engine.overlaySettings.zebraEnabled {
                 OverlayMetalView(driver: driver)
                     .aspectRatio(3.0 / 4.0, contentMode: .fit)
@@ -64,7 +73,8 @@ struct ViewfinderScreen: View {
             VStack(spacing: 0) {
                 TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
                        showGrid: $showGrid, showLevel: $showLevel,
-                       rotation: orientation.uiAngle)
+                       rotation: orientation.uiAngle,
+                       longAvailable: longController != nil)
                 if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
                     HStack {
                         Spacer()
@@ -72,6 +82,10 @@ struct ViewfinderScreen: View {
                     }
                 }
                 Spacer()
+                if let longController, longController.isExposing {
+                    LongExposureHUD(controller: longController)
+                        .padding(.bottom, 4)
+                }
                 if let parameter = selected {
                     ParameterDial(engine: engine, parameter: parameter)
                 }
@@ -87,6 +101,12 @@ struct ViewfinderScreen: View {
         .statusBarHidden()
         .onAppear { orientation.start() }
         .onDisappear { orientation.stop() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { longController?.interrupted() }
+        }
+        .onChange(of: engine.status) { _, status in
+            if status == .interrupted { longController?.interrupted() }
+        }
         .gesture(
             MagnifyGesture()
                 .onChanged { value in
@@ -124,15 +144,20 @@ struct ViewfinderScreen: View {
             }
             .buttonStyle(.plain)
             Spacer()
-            Button {
-                takePhoto()
-            } label: {
-                Circle()
-                    .fill(.white)
-                    .frame(width: 62, height: 62)
-                    .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 4).padding(-5))
+            ZStack {
+                if let longController, longController.isExposing {
+                    LongExposureShutterRing(controller: longController)
+                }
+                Button {
+                    takePhoto()
+                } label: {
+                    Circle()
+                        .fill(.white)
+                        .frame(width: 62, height: 62)
+                        .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 4).padding(-5))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
             Spacer()
             HStack(spacing: 6) {
                 ForEach(engine.availableLenses, id: \.self) { lens in
@@ -157,6 +182,14 @@ struct ViewfinderScreen: View {
     }
 
     func takePhoto() {
+        if let longController, engine.longMode != .off || longController.isExposing {
+            if longController.isExposing {
+                longController.shutterTapped()
+            } else {
+                startLongExposure(longController)
+            }
+            return
+        }
         if countdownTask != nil {
             countdownTask?.cancel()
             countdownTask = nil
@@ -176,6 +209,20 @@ struct ViewfinderScreen: View {
             countdown = nil
             countdownTask = nil
             if timer.state == .fired { performCapture() }
+        }
+    }
+
+    private func startLongExposure(_ controller: LongExposureController) {
+        engine.prepareLongExposure()
+        engine.beginLongFrames { buffer in controller.ingest(buffer) }
+        controller.start(mode: engine.longMode, blend: engine.longBlend) { data in
+            engine.endLongFrames()
+            engine.endLongExposure()
+            if let data {
+                if let image = UIImage(data: data) { lastThumbnail = image }
+                let resource = CaptureResource(kind: .processedHEIF, data: data)
+                Task { await store.store([resource]) }
+            }
         }
     }
 

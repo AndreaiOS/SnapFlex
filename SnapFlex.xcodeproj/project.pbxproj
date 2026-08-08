@@ -41,6 +41,7 @@
 		E4705DE7239E225FA24A05EF /* LongAccumulatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */; };
 		EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */; };
 		F15A41226521D1EE15BE509D /* ViewfinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */; };
+		F2B5FC076758871D27E4D32B /* LongExposureHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB27654374FCFD6F00971A2B /* LongExposureHUD.swift */; };
 		F76A868A2066FB9E9A8C2F42 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C025B67D84EDEB54171BE9F /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +92,7 @@
 		D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		E19500F32976684BCFADBA6C /* ShaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderTests.swift; sourceTree = "<group>"; };
 		F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealCameraDevice.swift; sourceTree = "<group>"; };
+		FB27654374FCFD6F00971A2B /* LongExposureHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureHUD.swift; sourceTree = "<group>"; };
 		FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -190,6 +192,7 @@
 				7C025B67D84EDEB54171BE9F /* Assets.xcassets */,
 				BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */,
 				3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */,
+				FB27654374FCFD6F00971A2B /* LongExposureHUD.swift */,
 				19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */,
 				5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */,
 				621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */,
@@ -303,6 +306,7 @@
 				40FC27F675BE9E4FDA19D5A3 /* HistogramView.swift in Sources */,
 				621CCED423DBF124DEA90B41 /* LongExposureAccumulator.swift in Sources */,
 				4B6CC2E95068B4C7FAE487E4 /* LongExposureController.swift in Sources */,
+				F2B5FC076758871D27E4D32B /* LongExposureHUD.swift in Sources */,
 				CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */,
 				DABA603F82293BE87F1A0236 /* LongPreviewMetalView.swift in Sources */,
 				EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */,

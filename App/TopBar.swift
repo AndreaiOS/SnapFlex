@@ -47,6 +47,7 @@ struct TopBar: View {
     @Binding var showGrid: Bool
     @Binding var showLevel: Bool
     var rotation: Double = 0
+    var longAvailable: Bool = true
 
     var body: some View {
         HStack(spacing: 8) {
@@ -59,6 +60,14 @@ struct TopBar: View {
             chip(engine.bracketCount.map { "BKT \($0)" } ?? "BKT OFF") {
                 engine.bracketCount = engine.bracketCount == nil ? 3
                     : engine.bracketCount == 3 ? 5 : nil
+            }
+            if longAvailable {
+                chip(engine.longMode.label) { engine.longMode = engine.longMode.next }
+                if engine.longMode != .off {
+                    chip(engine.longBlend.rawValue) {
+                        engine.longBlend = engine.longBlend == .nd ? .trails : .nd
+                    }
+                }
             }
             Spacer()
             assistMenu
