@@ -10,7 +10,7 @@ targets:
   SnapFlex:
     type: application
     platform: iOS
-    sources: [App, Engine, Overlay]
+    sources: [App, Engine, Overlay, LongExposure]
     dependencies:
       - package: SnapFlexCore
     settings:

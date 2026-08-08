@@ -20,6 +20,7 @@
 		594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */; };
 		5DF57BC171CB5A74E46CF3CE /* ParameterDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC948942CC36FA4AB62B09F3 /* ParameterDial.swift */; };
 		5F14AA211C298A270AC0ED88 /* OrientationModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0F682143B9DB436AF6D439 /* OrientationModelTests.swift */; };
+		621CCED423DBF124DEA90B41 /* LongExposureAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13C99BD62261A95AF8B74598 /* LongExposureAccumulator.swift */; };
 		623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */; };
 		65015462886289F1C00BD38C /* ShaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19500F32976684BCFADBA6C /* ShaderTests.swift */; };
 		67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */; };
@@ -30,9 +31,11 @@
 		B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */; };
 		BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A3D069FD29E60E67240457 /* OverlayFrameDriver.swift */; };
 		BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */; };
+		CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */; };
 		D8CD8F617A9A903B42031249 /* CaptureStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */; };
 		DC7246D978A486118FAF2C2C /* OverlayPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */; };
 		E2373E9C1CAC9A8D74EC3F5C /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C3AFC05BB91ED93F7640B /* PreviewView.swift */; };
+		E4705DE7239E225FA24A05EF /* LongAccumulatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */; };
 		EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */; };
 		F15A41226521D1EE15BE509D /* ViewfinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */; };
 		F76A868A2066FB9E9A8C2F42 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C025B67D84EDEB54171BE9F /* Assets.xcassets */; };
@@ -52,6 +55,7 @@
 		0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeCameraDevice.swift; sourceTree = "<group>"; };
 		0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngineTests.swift; sourceTree = "<group>"; };
 		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13C99BD62261A95AF8B74598 /* LongExposureAccumulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureAccumulator.swift; sourceTree = "<group>"; };
 		15D7F7A00CDC15EC165C485E /* OverlayPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPipeline.swift; sourceTree = "<group>"; };
 		2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewfinderScreen.swift; sourceTree = "<group>"; };
 		327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinator.swift; sourceTree = "<group>"; };
@@ -68,8 +72,10 @@
 		7C025B67D84EDEB54171BE9F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8170FBCBCE94A76D4EE06E7C /* TopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = LongExposureShaders.metal; sourceTree = "<group>"; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		A175F8825986D9B794759E53 /* PermissionGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionGate.swift; sourceTree = "<group>"; };
+		B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongAccumulatorTests.swift; sourceTree = "<group>"; };
 		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
 		BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridLevelOverlay.swift; sourceTree = "<group>"; };
 		BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterBar.swift; sourceTree = "<group>"; };
@@ -129,11 +135,21 @@
 			children = (
 				FA9972BB87381D975C074754 /* App */,
 				3A90C7037B58787CE767401B /* Engine */,
+				9125AB8FAFF6076CD5B2D35B /* LongExposure */,
 				586B284DD3C1FFF648BC8BA2 /* Overlay */,
 				05E57CD187E0B47B143ECE38 /* Packages */,
 				F84FCA7F61494136B70ABD85 /* Tests */,
 				915B04773E81B29BC49BB81F /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		9125AB8FAFF6076CD5B2D35B /* LongExposure */ = {
+			isa = PBXGroup;
+			children = (
+				13C99BD62261A95AF8B74598 /* LongExposureAccumulator.swift */,
+				9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */,
+			);
+			path = LongExposure;
 			sourceTree = "<group>";
 		};
 		915B04773E81B29BC49BB81F /* Products */ = {
@@ -151,6 +167,7 @@
 				0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */,
 				FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */,
 				0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */,
+				B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */,
 				5D0F682143B9DB436AF6D439 /* OrientationModelTests.swift */,
 				489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */,
 				E19500F32976684BCFADBA6C /* ShaderTests.swift */,
@@ -275,6 +292,8 @@
 				BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */,
 				1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */,
 				40FC27F675BE9E4FDA19D5A3 /* HistogramView.swift in Sources */,
+				621CCED423DBF124DEA90B41 /* LongExposureAccumulator.swift in Sources */,
+				CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */,
 				EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */,
 				BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */,
 				623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */,
@@ -300,6 +319,7 @@
 				594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */,
 				D8CD8F617A9A903B42031249 /* CaptureStoreTests.swift in Sources */,
 				67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */,
+				E4705DE7239E225FA24A05EF /* LongAccumulatorTests.swift in Sources */,
 				5F14AA211C298A270AC0ED88 /* OrientationModelTests.swift in Sources */,
 				1139237AD387A6B02E90B7F0 /* PhotoCaptureCoordinatorTests.swift in Sources */,
 				65015462886289F1C00BD38C /* ShaderTests.swift in Sources */,
