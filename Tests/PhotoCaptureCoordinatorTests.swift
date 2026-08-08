@@ -54,6 +54,15 @@ import SnapFlexCore
         }
     }
 
+    @Test func rawOnlyRecipeSkipsPrioritization() {
+        // Setting photoQualityPrioritization on RAW-only settings throws
+        // NSInvalidArgumentException on device; the guard must leave the default.
+        let recipe = CaptureRecipe(raw: RAWKind.bayer, includeProcessed: false,
+                                   bracketing: nil, processing: .max)
+        let settings = PhotoCaptureCoordinator.makeSettings(recipe: recipe, rawType: nil, flashOn: false)
+        #expect(settings.photoQualityPrioritization == .balanced)
+    }
+
     @Test func bracketSettingsSkipPrioritization() {
         let recipe = CaptureRecipe(raw: RAWKind.none, includeProcessed: true,
                                    bracketing: .autoExposure(biases: [-1, 0, 1]), processing: .max)

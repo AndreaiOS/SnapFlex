@@ -1,6 +1,5 @@
 import Foundation
 import Photos
-import UniformTypeIdentifiers
 import os
 
 protocol PhotoLibraryProtocol {
@@ -31,25 +30,34 @@ final class PhotoKitLibrary: PhotoLibraryProtocol {
     }
 
     func save(_ resources: [CaptureResource]) async throws {
+        let heif = resources.first { $0.kind == .processedHEIF }
+        let raws = resources.filter { $0.kind == .rawDNG }
+
+        // Photos rejects data-based DNG resources with PHPhotosErrorDomain 3300
+        // (changeNotSupported): its writer needs a filename to identify the RAW
+        // format. Stage each DNG as a temporary .dng file and add it by fileURL.
+        var rawURLs: [URL] = []
+        for (index, raw) in raws.enumerated() {
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("snapflex-save-\(UUID().uuidString)-\(index).dng")
+            try raw.data.write(to: url)
+            rawURLs.append(url)
+        }
+        defer {
+            for url in rawURLs { try? FileManager.default.removeItem(at: url) }
+        }
+
         try await PHPhotoLibrary.shared().performChanges {
             let request = PHAssetCreationRequest.forAsset()
-            let heif = resources.first { $0.kind == .processedHEIF }
-            let raws = resources.filter { $0.kind == .rawDNG }
             if let heif {
                 request.addResource(with: .photo, data: heif.data, options: nil)
-                for raw in raws {
-                    let options = PHAssetResourceCreationOptions()
-                    options.uniformTypeIdentifier = UTType.dng.identifier
-                    request.addResource(with: .alternatePhoto, data: raw.data, options: options)
+                for url in rawURLs {
+                    request.addResource(with: .alternatePhoto, fileURL: url, options: nil)
                 }
-            } else if let first = raws.first {
-                let options = PHAssetResourceCreationOptions()
-                options.uniformTypeIdentifier = UTType.dng.identifier
-                request.addResource(with: .photo, data: first.data, options: options)
-                for raw in raws.dropFirst() {
-                    let extra = PHAssetResourceCreationOptions()
-                    extra.uniformTypeIdentifier = UTType.dng.identifier
-                    request.addResource(with: .alternatePhoto, data: raw.data, options: extra)
+            } else if let first = rawURLs.first {
+                request.addResource(with: .photo, fileURL: first, options: nil)
+                for url in rawURLs.dropFirst() {
+                    request.addResource(with: .alternatePhoto, fileURL: url, options: nil)
                 }
             }
         }

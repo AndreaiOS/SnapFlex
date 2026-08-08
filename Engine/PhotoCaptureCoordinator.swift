@@ -52,10 +52,15 @@ final class PhotoCaptureCoordinator: NSObject, AVCapturePhotoCaptureDelegate {
         }
         if !(settings is AVCapturePhotoBracketSettings) {
             settings.flashMode = flashOn ? .on : .off
-            settings.photoQualityPrioritization = switch recipe.processing {
-            case .zero: .speed
-            case .standard: .balanced
-            case .max: .quality
+            // Prioritization applies to the processed image; AVFoundation throws
+            // NSInvalidArgumentException ("Unsupported when capturing RAW") if it is
+            // set on RAW-only settings, so only set it when a processed output exists.
+            if recipe.includeProcessed {
+                settings.photoQualityPrioritization = switch recipe.processing {
+                case .zero: .speed
+                case .standard: .balanced
+                case .max: .quality
+                }
             }
         }
         return settings
