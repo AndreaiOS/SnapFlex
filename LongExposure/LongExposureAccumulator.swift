@@ -1,5 +1,6 @@
 import CoreImage
 import Metal
+import os
 import SnapFlexCore
 
 final class LongExposureAccumulator {
@@ -8,6 +9,7 @@ final class LongExposureAccumulator {
     private let maxPipeline: MTLComputePipelineState
     private let ciContext: CIContext
     private let lock = NSLock()
+    private let logger = Logger(subsystem: "co.SnapFlex", category: "long-exposure")
 
     private var blend: LongBlend = .nd
     private var _frameCount = 0
@@ -18,6 +20,7 @@ final class LongExposureAccumulator {
         return _frameCount
     }
 
+    /// Preview/readout consumers MUST encode their reads on the same MTLCommandQueue passed to accumulate(texture:commandQueue:) — command-queue ordering is the only cross-pass synchronization.
     var accumulationTexture: MTLTexture? {
         lock.lock(); defer { lock.unlock() }
         return _accumulationTexture
@@ -43,6 +46,7 @@ final class LongExposureAccumulator {
         _accumulationTexture = nil
     }
 
+    /// Call from a single serial queue; pass the same commandQueue used by any preview renderer.
     func accumulate(texture: MTLTexture, commandQueue: MTLCommandQueue) {
         lock.lock()
         if _accumulationTexture == nil ||
@@ -56,23 +60,33 @@ final class LongExposureAccumulator {
             _accumulationTexture = device.makeTexture(descriptor: descriptor)
             _frameCount = 0
         }
-        _frameCount += 1
-        var frameNumber = UInt32(_frameCount)
-        let accumulation = _accumulationTexture!
+        let frameNumber = UInt32(_frameCount + 1)
+        let accumulation = _accumulationTexture
         let pipeline = blend == .nd ? averagePipeline : maxPipeline
         lock.unlock()
 
+        guard let accumulation = accumulation else {
+            logger.error("Failed to allocate accumulation texture")
+            return
+        }
+
         guard let commandBuffer = commandQueue.makeCommandBuffer(),
               let encoder = commandBuffer.makeComputeCommandEncoder() else { return }
+
+        var frameNumberBuf = frameNumber
         encoder.setComputePipelineState(pipeline)
         encoder.setTexture(texture, index: 0)
         encoder.setTexture(accumulation, index: 1)
-        encoder.setBytes(&frameNumber, length: MemoryLayout<UInt32>.stride, index: 0)
+        encoder.setBytes(&frameNumberBuf, length: MemoryLayout<UInt32>.stride, index: 0)
         encoder.dispatchThreads(MTLSize(width: texture.width, height: texture.height, depth: 1),
                                 threadsPerThreadgroup: MTLSize(width: 8, height: 8, depth: 1))
         encoder.endEncoding()
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
+
+        lock.lock()
+        _frameCount += 1
+        lock.unlock()
     }
 
     func readoutImageData() -> Data? {
