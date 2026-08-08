@@ -47,6 +47,7 @@ struct GridLevelOverlay: View {
                         .rotationEffect(.degrees(-level.roll))
                 }
             }
+            .frame(width: geo.size.width, height: geo.size.height)
         }
         .allowsHitTesting(false)
         .onAppear { if showLevel { level.start() } }
