@@ -129,6 +129,7 @@ struct ViewfinderScreen: View {
                 ForEach(engine.availableLenses, id: \.self) { lens in
                     Button {
                         engine.selectLens(lens)
+                        zoomBase = 1
                     } label: {
                         Text(lens.displayName)
                             .font(Theme.valueFont(11))
