@@ -36,3 +36,10 @@ not work in the simulator).
 - [ ] Photos permission denied: captures spool, banner-free but nothing lost;
       granting later flushes them to the library on next foreground
 - [ ] Phone call during preview shows "Camera paused", resumes after
+- [ ] LONG ND 5s on running water produces silk effect; live preview builds up
+- [ ] LONG TRAILS on moving lights produces trails
+- [ ] BULB: starts on tap, stops+saves on second tap; auto-stops at 5 min
+- [ ] Preset tap-to-cancel discards (nothing saved to Photos)
+- [ ] Backgrounding mid-exposure saves the partial result (if ≥ 1s)
+- [ ] Shake warning appears handheld, absent on tripod
+- [ ] AE stays locked during the exposure (no brightness pumping in preview)
