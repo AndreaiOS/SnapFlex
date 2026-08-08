@@ -89,19 +89,23 @@ struct TopBar: View {
 
     private func chip(_ text: String, highlighted: Bool = false,
                       action: @escaping () -> Void) -> some View {
-        Button {
+        let foreground: Color = highlighted ? Theme.accent : Color.white.opacity(0.92)
+        let fill: Color = highlighted ? Theme.accent.opacity(0.14) : Color.white.opacity(0.08)
+        let border: Color = highlighted ? Theme.accent.opacity(0.45) : Color.white.opacity(0.14)
+        return Button {
             action()
             Haptics.light()
         } label: {
             Text(text)
                 .font(Theme.valueFont(10))
+                .tracking(0.5)
                 .lineLimit(1)
                 .fixedSize()
-                .foregroundStyle(highlighted ? Theme.accent : .white)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(highlighted ? Theme.accent.opacity(0.16) : Color.white.opacity(0.12))
-                .clipShape(Capsule())
+                .foregroundStyle(foreground)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4.5)
+                .background(Capsule().fill(fill))
+                .overlay(Capsule().strokeBorder(border, lineWidth: 1))
                 .rotatesWithDevice(rotation)
                 .contentTransition(.numericText())
                 .animation(Theme.motion(Theme.springStandard), value: text)

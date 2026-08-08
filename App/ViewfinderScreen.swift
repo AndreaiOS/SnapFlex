@@ -146,6 +146,7 @@ struct ViewfinderScreen: View {
                     }
                 }
                 .opacity(chromeHidden ? 0 : 1)
+                .scaleEffect(chromeHidden ? 0.96 : 1, anchor: .top)
                 .allowsHitTesting(!chromeHidden)
                 .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
                 Spacer()
@@ -165,6 +166,7 @@ struct ViewfinderScreen: View {
                 .disabled(isLongExposing)
                 .opacity(isLongExposing ? 0.4 : 1)
                 .opacity(chromeHidden ? 0 : 1)
+                .scaleEffect(chromeHidden ? 0.96 : 1, anchor: .bottom)
                 .allowsHitTesting(!chromeHidden)
                 .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
                 bottomRow
@@ -177,13 +179,14 @@ struct ViewfinderScreen: View {
                 Text(chromeReadout(values: engine.values, longMode: engine.longMode,
                                     longBlend: engine.longBlend, processing: engine.processingLevel))
                     .font(Theme.valueFont(11))
-                    .foregroundStyle(.white)
+                    .tracking(0.5)
+                    .foregroundStyle(Theme.accent)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Theme.chrome)
-                    .clipShape(Capsule())
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(Color.black.opacity(0.55)))
+                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
                     .padding(.horizontal, 16)
                     .rotatesWithDevice(orientation.uiAngle)
                     .allowsHitTesting(false)
