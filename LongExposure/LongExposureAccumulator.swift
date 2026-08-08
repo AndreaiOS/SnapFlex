@@ -9,6 +9,12 @@ final class LongExposureAccumulator {
     private let maxPipeline: MTLComputePipelineState
     private let ciContext: CIContext
     private let lock = NSLock()
+    /// Guards the GPU section of `accumulate(texture:commandQueue:)` (command buffer commit
+    /// through waitUntilCompleted) against `readoutImageData()`'s CIContext read of the same
+    /// texture, so a straggler frame's in-flight write can never race a readout. Lock order is
+    /// always `lock` (metadata) → `gpuLock` (GPU) → `lock` (frameCount increment); `lock` is
+    /// never held while acquiring `gpuLock`.
+    private let gpuLock = NSLock()
     private let logger = Logger(subsystem: "co.SnapFlex", category: "long-exposure")
 
     private var blend: LongBlend = .nd
@@ -20,7 +26,7 @@ final class LongExposureAccumulator {
         return _frameCount
     }
 
-    /// Preview/readout consumers MUST encode their reads on the same MTLCommandQueue passed to accumulate(texture:commandQueue:) — command-queue ordering is the only cross-pass synchronization.
+    /// Preview consumers MUST encode their reads on the same MTLCommandQueue passed to accumulate(texture:commandQueue:) — command-queue ordering is the live-preview synchronization. `readoutImageData()` additionally takes `gpuLock`, which guarantees it never overlaps an in-flight `accumulate` GPU pass regardless of queue ordering.
     var accumulationTexture: MTLTexture? {
         lock.lock(); defer { lock.unlock() }
         return _accumulationTexture
@@ -70,6 +76,9 @@ final class LongExposureAccumulator {
             return
         }
 
+        gpuLock.lock()
+        defer { gpuLock.unlock() }
+
         guard let commandBuffer = commandQueue.makeCommandBuffer(),
               let encoder = commandBuffer.makeComputeCommandEncoder() else { return }
 
@@ -89,7 +98,13 @@ final class LongExposureAccumulator {
         lock.unlock()
     }
 
+    /// Takes `gpuLock` before reading the texture so this can never overlap an in-flight
+    /// `accumulate` GPU pass — closes the race where a straggler frame's write (already past
+    /// the controller's `running` gate, mid-flight between commit and waitUntilCompleted) could
+    /// otherwise be read by CIContext concurrently with the compute encoder writing to it.
     func readoutImageData() -> Data? {
+        gpuLock.lock()
+        defer { gpuLock.unlock() }
         guard let texture = accumulationTexture,
               let ciImage = CIImage(mtlTexture: texture, options: [
                   .colorSpace: CGColorSpace(name: CGColorSpace.sRGB) as Any,
