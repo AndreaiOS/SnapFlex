@@ -3,6 +3,13 @@ import SwiftUI
 import SnapFlexCore
 import UIKit
 
+/// Mutable holder for a background task identifier, shared between the
+/// expiration handler and the completion closure that ends it — closures
+/// can't both capture and mutate a plain `var` across two escaping contexts.
+private final class LongExposureBackgroundGuard {
+    var id: UIBackgroundTaskIdentifier = .invalid
+}
+
 struct ViewfinderScreen: View {
     let engine: CameraEngine
     let session: AVCaptureSession
@@ -231,6 +238,11 @@ struct ViewfinderScreen: View {
 
     private func startLongExposure(_ controller: LongExposureController) {
         UIApplication.shared.isIdleTimerDisabled = true
+        let backgroundGuard = LongExposureBackgroundGuard()
+        backgroundGuard.id = UIApplication.shared.beginBackgroundTask(withName: "long-exposure-finalize") {
+            UIApplication.shared.endBackgroundTask(backgroundGuard.id)
+            backgroundGuard.id = .invalid
+        }
         engine.prepareLongExposure()
         engine.beginLongFrames { buffer in controller.ingest(buffer) }
         controller.start(mode: engine.longMode, blend: engine.longBlend) { data in
@@ -240,7 +252,16 @@ struct ViewfinderScreen: View {
             if let data {
                 if let image = UIImage(data: data) { lastThumbnail = image }
                 let resource = CaptureResource(kind: .processedHEIF, data: data)
-                Task { await store.store([resource]) }
+                Task {
+                    await store.store([resource])
+                    if backgroundGuard.id != .invalid {
+                        UIApplication.shared.endBackgroundTask(backgroundGuard.id)
+                        backgroundGuard.id = .invalid
+                    }
+                }
+            } else if backgroundGuard.id != .invalid {
+                UIApplication.shared.endBackgroundTask(backgroundGuard.id)
+                backgroundGuard.id = .invalid
             }
         }
     }
