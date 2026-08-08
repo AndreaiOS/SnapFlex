@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09B41C74FC91F2399BA9B1DE /* LongControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B1E47887DC0A63934CF5AA /* LongControllerTests.swift */; };
 		1139237AD387A6B02E90B7F0 /* PhotoCaptureCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */; };
 		17BEE6B2CCF25EECE6441AD4 /* ParameterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */; };
 		1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */; };
@@ -16,6 +17,7 @@
 		447384718A2AB4FD99063FFE /* RealCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */; };
 		47AB36FA94AF6ADFA482F76B /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */; };
 		4991237717EB8B060F0121BE /* PhotoCaptureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */; };
+		4B6CC2E95068B4C7FAE487E4 /* LongExposureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00957AB69B137CAEF89B5036 /* LongExposureController.swift */; };
 		4D7F6CAD762D6D11BC0AD5BC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 32CA4EF3B4BF9DA85E164C13 /* Shaders.metal */; };
 		594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */; };
 		5DF57BC171CB5A74E46CF3CE /* ParameterDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC948942CC36FA4AB62B09F3 /* ParameterDial.swift */; };
@@ -52,6 +54,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00957AB69B137CAEF89B5036 /* LongExposureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureController.swift; sourceTree = "<group>"; };
 		0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeCameraDevice.swift; sourceTree = "<group>"; };
 		0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngineTests.swift; sourceTree = "<group>"; };
 		0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SnapFlex.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -72,6 +75,7 @@
 		7C025B67D84EDEB54171BE9F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8170FBCBCE94A76D4EE06E7C /* TopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		96B1E47887DC0A63934CF5AA /* LongControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongControllerTests.swift; sourceTree = "<group>"; };
 		9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = LongExposureShaders.metal; sourceTree = "<group>"; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		A175F8825986D9B794759E53 /* PermissionGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionGate.swift; sourceTree = "<group>"; };
@@ -147,6 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				13C99BD62261A95AF8B74598 /* LongExposureAccumulator.swift */,
+				00957AB69B137CAEF89B5036 /* LongExposureController.swift */,
 				9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */,
 			);
 			path = LongExposure;
@@ -168,6 +173,7 @@
 				FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */,
 				0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */,
 				B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */,
+				96B1E47887DC0A63934CF5AA /* LongControllerTests.swift */,
 				5D0F682143B9DB436AF6D439 /* OrientationModelTests.swift */,
 				489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */,
 				E19500F32976684BCFADBA6C /* ShaderTests.swift */,
@@ -293,6 +299,7 @@
 				1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */,
 				40FC27F675BE9E4FDA19D5A3 /* HistogramView.swift in Sources */,
 				621CCED423DBF124DEA90B41 /* LongExposureAccumulator.swift in Sources */,
+				4B6CC2E95068B4C7FAE487E4 /* LongExposureController.swift in Sources */,
 				CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */,
 				EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */,
 				BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */,
@@ -320,6 +327,7 @@
 				D8CD8F617A9A903B42031249 /* CaptureStoreTests.swift in Sources */,
 				67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */,
 				E4705DE7239E225FA24A05EF /* LongAccumulatorTests.swift in Sources */,
+				09B41C74FC91F2399BA9B1DE /* LongControllerTests.swift in Sources */,
 				5F14AA211C298A270AC0ED88 /* OrientationModelTests.swift in Sources */,
 				1139237AD387A6B02E90B7F0 /* PhotoCaptureCoordinatorTests.swift in Sources */,
 				65015462886289F1C00BD38C /* ShaderTests.swift in Sources */,
