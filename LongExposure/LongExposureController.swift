@@ -48,10 +48,15 @@ final class LongExposureController {
         timerTask = Task { [weak self] in
             guard let self else { return }
             var shouldSave = false
+            var lastTick = ContinuousClock.now
             while true {
                 try? await Task.sleep(for: .milliseconds(100))
                 guard !Task.isCancelled else { return }
-                self.session?.tick(0.1)
+                let now = ContinuousClock.now
+                let delta = Double((now - lastTick).components.seconds)
+                    + Double((now - lastTick).components.attoseconds) / 1e18
+                lastTick = now
+                self.session?.tick(delta)
                 self.elapsed = self.session?.elapsed ?? self.elapsed
                 self.progress = self.session?.progress
                 if case .finished(let save) = self.session?.phase {

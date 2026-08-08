@@ -50,6 +50,12 @@ struct LongExposureHUD: View {
                     .font(Theme.valueFont(22))
                     .foregroundStyle(Theme.accent)
                     .monospacedDigit()
+                if controller.progress != nil {
+                    Text("-" + String(format: "%.0fs", max(0, (controller.session?.targetSeconds ?? 0) - controller.elapsed)))
+                        .font(Theme.labelFont)
+                        .foregroundStyle(.gray)
+                        .monospacedDigit()
+                }
             }
         }
         .padding(.horizontal, 12)

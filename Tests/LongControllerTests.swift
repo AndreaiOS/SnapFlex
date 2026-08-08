@@ -25,4 +25,15 @@ import SnapFlexCore
         #expect(result != nil && result! == nil)
         #expect(!controller.isExposing)
     }
+
+    @Test func interruptedFinalizesSession() async throws {
+        let controller = try #require(LongExposureController())
+        var result: Data?? = nil
+        controller.start(mode: .preset(seconds: 30), blend: .nd) { result = .some($0) }
+        try await Task.sleep(for: .milliseconds(300))
+        controller.interrupted()
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(result != nil && result! == nil)   // <1s → discard, but finalized exactly once
+        #expect(!controller.isExposing)
+    }
 }

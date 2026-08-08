@@ -122,6 +122,11 @@ struct ViewfinderScreen: View {
         .onChange(of: engine.status) { _, status in
             if status == .interrupted { longController?.interrupted() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: ProcessInfo.thermalStateDidChangeNotification)) { _ in
+            if ProcessInfo.processInfo.thermalState == .serious || ProcessInfo.processInfo.thermalState == .critical {
+                longController?.interrupted()
+            }
+        }
         .gesture(
             MagnifyGesture()
                 .onChanged { value in
