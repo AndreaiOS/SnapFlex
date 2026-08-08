@@ -20,7 +20,7 @@ targets:
         INFOPLIST_KEY_NSCameraUsageDescription: "SnapFlex needs the camera to take photos."
         INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "SnapFlex saves your photos to your library."
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: "1"
         MARKETING_VERSION: "1.0"
