@@ -67,6 +67,17 @@ struct ViewfinderScreen: View {
         }
     }
 
+    /// Throttled entry point for high-frequency interaction sources (drag deltas during
+    /// dial scrubs/pinches, per-frame value changes): skips the mutating/animated path
+    /// entirely when it wouldn't change anything, avoiding a full body re-eval at input rate.
+    private func chromeInteractionThrottled() {
+        let now = Date().timeIntervalSinceReferenceDate
+        guard chrome.needsInteraction(at: now) else { return }
+        withAnimation(Theme.motion(Theme.springBouncy)) {
+            chrome.interaction(at: now)
+        }
+    }
+
     var body: some View {
         ZStack {
             PreviewView(session: session, onCaptureEvent: { takePhoto() })
@@ -131,7 +142,7 @@ struct ViewfinderScreen: View {
                 }
                 .opacity(chromeHidden ? 0 : 1)
                 .allowsHitTesting(!chromeHidden)
-                .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
+                .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
                 Spacer()
                 if let longController, longController.isExposing {
                     LongExposureHUD(controller: longController)
@@ -150,10 +161,11 @@ struct ViewfinderScreen: View {
                 .opacity(isLongExposing ? 0.4 : 1)
                 .opacity(chromeHidden ? 0 : 1)
                 .allowsHitTesting(!chromeHidden)
-                .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
+                .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
                 bottomRow
                     .padding(.vertical, 10)
-                    .background(Theme.chrome)
+                    .background(Theme.chrome.opacity(chromeHidden ? 0 : 1))
+                    .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
             }
 
             if chromeHidden {
@@ -176,10 +188,13 @@ struct ViewfinderScreen: View {
         .onAppear {
             orientation.start()
             chrome.blocked = chromeBlocked
+            chrome.interaction(at: Date().timeIntervalSinceReferenceDate)
             chromeTask = Task {
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .milliseconds(500))
-                    chrome.tick(now: Date().timeIntervalSinceReferenceDate)
+                    withAnimation(Theme.motion(Theme.springStandard)) {
+                        chrome.tick(now: Date().timeIntervalSinceReferenceDate)
+                    }
                 }
             }
         }
@@ -192,7 +207,7 @@ struct ViewfinderScreen: View {
             chrome.blocked = blocked
         }
         .onChange(of: engine.values) { _, _ in
-            chromeInteraction()
+            chromeInteractionThrottled()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { longController?.interrupted() }
@@ -220,7 +235,7 @@ struct ViewfinderScreen: View {
         )
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
-                .onChanged { _ in chromeInteraction() }
+                .onChanged { _ in chromeInteractionThrottled() }
         )
     }
 
@@ -253,7 +268,7 @@ struct ViewfinderScreen: View {
             .opacity(isLongExposing ? 0.4 : 1)
             .opacity(chromeHidden ? 0 : 1)
             .allowsHitTesting(!chromeHidden)
-            .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
+            .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
             Spacer()
             ZStack {
                 if let longController, longController.isExposing {
@@ -277,7 +292,7 @@ struct ViewfinderScreen: View {
                 }
                 .buttonStyle(ShutterButtonStyle())
                 .scaleEffect(chromeHidden ? 54.0 / 62.0 : 1)
-                .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
+                .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
             }
             Spacer()
             HStack(spacing: 6) {
@@ -302,7 +317,7 @@ struct ViewfinderScreen: View {
             .opacity(isLongExposing ? 0.4 : 1)
             .opacity(chromeHidden ? 0 : 1)
             .allowsHitTesting(!chromeHidden)
-            .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
+            .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
         }
         .padding(.horizontal, 20)
     }
@@ -338,7 +353,10 @@ struct ViewfinderScreen: View {
             }
             countdown = nil
             countdownTask = nil
-            if timer.state == .fired { performCapture() }
+            if timer.state == .fired {
+                chromeInteraction()
+                performCapture()
+            }
         }
     }
 
@@ -352,6 +370,7 @@ struct ViewfinderScreen: View {
             UIApplication.shared.isIdleTimerDisabled = false
             engine.endLongFrames()
             engine.endLongExposure()
+            chromeInteraction()
             if let data {
                 Haptics.success()
                 if let image = UIImage(data: data) {

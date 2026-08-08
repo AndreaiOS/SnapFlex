@@ -31,6 +31,14 @@ public struct ChromeVisibility: Equatable, Sendable {
             state = .minimal
         }
     }
+
+    /// Pure query for throttling high-frequency interaction sources (e.g. drag deltas,
+    /// value changes during dial scrubs): true when an `interaction(at:)` call right now
+    /// would actually change anything — chrome isn't fully visible, or the idle clock
+    /// hasn't been refreshed in at least `minInterval`. Does not mutate state.
+    public func needsInteraction(at now: Double, minInterval: Double = 0.25) -> Bool {
+        state != .full || now - lastInteraction >= minInterval
+    }
 }
 
 /// "ISO 200 · 1/120 · ND 15s" summary for the minimal readout pill.

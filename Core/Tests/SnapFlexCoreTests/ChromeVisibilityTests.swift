@@ -42,6 +42,26 @@ import Testing
         chrome.tick(now: 1.0)
         #expect(chrome.state == .full)
     }
+
+    @Test func needsInteractionFalseWhenFullAndRecent() {
+        var chrome = ChromeVisibility()
+        chrome.interaction(at: 10)
+        #expect(chrome.needsInteraction(at: 10.1) == false)
+    }
+
+    @Test func needsInteractionTrueWhenMinimal() {
+        var chrome = ChromeVisibility()
+        chrome.interaction(at: 0)
+        chrome.tick(now: 5)
+        #expect(chrome.state == .minimal)
+        #expect(chrome.needsInteraction(at: 5.1) == true)
+    }
+
+    @Test func needsInteractionTrueWhenInteractionStale() {
+        var chrome = ChromeVisibility()
+        chrome.interaction(at: 10)
+        #expect(chrome.needsInteraction(at: 10.3) == true)
+    }
 }
 
 @Suite struct ChromeReadoutTests {
