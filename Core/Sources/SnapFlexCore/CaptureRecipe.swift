@@ -32,15 +32,17 @@ public struct CaptureRecipe: Equatable, Sendable {
     public var raw: RAWKind
     public var includeProcessed: Bool
     public var bracketing: BracketingPlan?
+    public var processing: ProcessingLevel
 
-    public init(raw: RAWKind, includeProcessed: Bool, bracketing: BracketingPlan?) {
+    public init(raw: RAWKind, includeProcessed: Bool, bracketing: BracketingPlan?, processing: ProcessingLevel = .standard) {
         self.raw = raw
         self.includeProcessed = includeProcessed
         self.bracketing = bracketing
+        self.processing = processing
     }
 
     public static func make(selection: FormatSelection, capabilities: DeviceCapabilities,
-                            bracketing: BracketingPlan?) -> CaptureRecipe {
+                            bracketing: BracketingPlan?, processing: ProcessingLevel = .standard) -> CaptureRecipe {
         var raw: RAWKind = switch selection.raw {
         case .off: .none
         case .proRAW: capabilities.supportsProRAW ? .proRAW
@@ -52,6 +54,6 @@ public struct CaptureRecipe: Equatable, Sendable {
             raw = capabilities.supportsBayerRAW ? .bayer : .none
         }
         let includeProcessed = selection.heifCompanion || raw == .none
-        return CaptureRecipe(raw: raw, includeProcessed: includeProcessed, bracketing: bracketing)
+        return CaptureRecipe(raw: raw, includeProcessed: includeProcessed, bracketing: bracketing, processing: processing)
     }
 }
