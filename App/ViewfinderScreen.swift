@@ -3,11 +3,31 @@ import SwiftUI
 import SnapFlexCore
 import UIKit
 
-/// Mutable holder for a background task identifier, shared between the
-/// expiration handler and the completion closure that ends it — closures
-/// can't both capture and mutate a plain `var` across two escaping contexts.
+/// Self-locking holder for a background task identifier, shared between the
+/// expiration handler (main thread) and the post-await completion path
+/// (arbitrary executor). `end()` is atomic and idempotent — it clears `id`
+/// under the lock before calling `endBackgroundTask`, so a race between the
+/// two callers can't double-end the same task.
 private final class LongExposureBackgroundGuard {
-    var id: UIBackgroundTaskIdentifier = .invalid
+    private let lock = NSLock()
+    private var id: UIBackgroundTaskIdentifier = .invalid
+
+    func begin(name: String) {
+        lock.lock(); defer { lock.unlock() }
+        id = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
+            self?.end()
+        }
+    }
+
+    func end() {
+        lock.lock()
+        let current = id
+        id = .invalid
+        lock.unlock()
+        if current != .invalid {
+            UIApplication.shared.endBackgroundTask(current)
+        }
+    }
 }
 
 struct ViewfinderScreen: View {
@@ -244,10 +264,7 @@ struct ViewfinderScreen: View {
     private func startLongExposure(_ controller: LongExposureController) {
         UIApplication.shared.isIdleTimerDisabled = true
         let backgroundGuard = LongExposureBackgroundGuard()
-        backgroundGuard.id = UIApplication.shared.beginBackgroundTask(withName: "long-exposure-finalize") {
-            UIApplication.shared.endBackgroundTask(backgroundGuard.id)
-            backgroundGuard.id = .invalid
-        }
+        backgroundGuard.begin(name: "long-exposure-finalize")
         engine.prepareLongExposure()
         engine.beginLongFrames { buffer in controller.ingest(buffer) }
         controller.start(mode: engine.longMode, blend: engine.longBlend) { data in
@@ -259,14 +276,10 @@ struct ViewfinderScreen: View {
                 let resource = CaptureResource(kind: .processedHEIF, data: data)
                 Task {
                     await store.store([resource])
-                    if backgroundGuard.id != .invalid {
-                        UIApplication.shared.endBackgroundTask(backgroundGuard.id)
-                        backgroundGuard.id = .invalid
-                    }
+                    backgroundGuard.end()
                 }
-            } else if backgroundGuard.id != .invalid {
-                UIApplication.shared.endBackgroundTask(backgroundGuard.id)
-                backgroundGuard.id = .invalid
+            } else {
+                backgroundGuard.end()
             }
         }
     }
