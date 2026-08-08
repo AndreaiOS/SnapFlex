@@ -205,6 +205,20 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     func capture(recipe: CaptureRecipe, flashOn: Bool,
                  completion: @escaping ([CaptureResource]) -> Void) {
         sessionQueue.async { [self] in
+            var recipe = recipe
+            if let bracketing = recipe.bracketing {
+                let maxCount = photoOutput.maxBracketedCapturePhotoCount
+                if maxCount <= 0 {
+                    recipe.bracketing = nil
+                } else {
+                    switch bracketing {
+                    case .autoExposure(let biases):
+                        recipe.bracketing = .autoExposure(biases: Array(biases.prefix(maxCount)))
+                    case .manual(let exposures):
+                        recipe.bracketing = .manual(exposures: Array(exposures.prefix(maxCount)))
+                    }
+                }
+            }
             let rawType: OSType? = switch recipe.raw {
             case .proRAW:
                 photoOutput.availableRawPhotoPixelFormatTypes
