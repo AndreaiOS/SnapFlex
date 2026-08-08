@@ -9,6 +9,13 @@ struct CaptureResource: Equatable {
     enum Kind: Equatable { case rawDNG, processedHEIF }
     let kind: Kind
     let data: Data
+    let frameIndex: Int
+
+    init(kind: Kind, data: Data, frameIndex: Int = 0) {
+        self.kind = kind
+        self.data = data
+        self.frameIndex = frameIndex
+    }
 }
 
 protocol CameraDeviceProtocol: AnyObject {

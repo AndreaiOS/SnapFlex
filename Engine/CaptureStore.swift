@@ -70,11 +70,15 @@ final class CaptureStore {
                 await flushSpool()
             }
         }
-        do {
-            guard library.isAuthorized else { throw CocoaError(.fileWriteNoPermission) }
-            try await library.save(resources)
-        } catch {
-            spool(resources)
+        let groups = Dictionary(grouping: resources, by: \.frameIndex)
+            .sorted { $0.key < $1.key }
+        for (_, group) in groups {
+            do {
+                guard library.isAuthorized else { throw CocoaError(.fileWriteNoPermission) }
+                try await library.save(group)
+            } catch {
+                spool(group)
+            }
         }
     }
 
@@ -86,9 +90,12 @@ final class CaptureStore {
         do {
             try fileManager.createDirectory(at: stagingDir, withIntermediateDirectories: true)
 
-            // Write all files to staging directory with atomic writes
+            // Write all files to staging directory with atomic writes; filenames are
+            // unique per frame so bracket frames spooled into the same group never collide.
             for resource in resources {
-                let name = resource.kind == .rawDNG ? "raw.dng" : "processed.heic"
+                let name = resource.kind == .rawDNG
+                    ? "raw-\(resource.frameIndex).dng"
+                    : "processed-\(resource.frameIndex).heic"
                 let fileURL = stagingDir.appendingPathComponent(name)
                 try resource.data.write(to: fileURL, options: .atomic)
             }
@@ -108,14 +115,19 @@ final class CaptureStore {
                   at: spoolDirectory, includingPropertiesForKeys: nil) else { return }
         let groups = allGroups.filter { !$0.lastPathComponent.hasSuffix(".partial") }
         for group in groups {
+            guard let files = try? fileManager.contentsOfDirectory(
+                      at: group, includingPropertiesForKeys: nil) else { continue }
             var resources: [CaptureResource] = []
-            let rawURL = group.appendingPathComponent("raw.dng")
-            let heifURL = group.appendingPathComponent("processed.heic")
-            if let data = try? Data(contentsOf: rawURL) {
-                resources.append(CaptureResource(kind: .rawDNG, data: data))
-            }
-            if let data = try? Data(contentsOf: heifURL) {
-                resources.append(CaptureResource(kind: .processedHEIF, data: data))
+            for file in files {
+                let name = file.lastPathComponent
+                guard let data = try? Data(contentsOf: file) else { continue }
+                if name.hasPrefix("raw-"), name.hasSuffix(".dng") {
+                    let frameIndex = Self.parseFrameIndex(from: name, prefix: "raw-", suffix: ".dng")
+                    resources.append(CaptureResource(kind: .rawDNG, data: data, frameIndex: frameIndex))
+                } else if name.hasPrefix("processed-"), name.hasSuffix(".heic") {
+                    let frameIndex = Self.parseFrameIndex(from: name, prefix: "processed-", suffix: ".heic")
+                    resources.append(CaptureResource(kind: .processedHEIF, data: data, frameIndex: frameIndex))
+                }
             }
             guard !resources.isEmpty else { try? fileManager.removeItem(at: group); continue }
             do {
@@ -125,5 +137,13 @@ final class CaptureStore {
                 // keep spooled; retry on next flush
             }
         }
+    }
+
+    private static func parseFrameIndex(from name: String, prefix: String, suffix: String) -> Int {
+        guard name.count >= prefix.count + suffix.count else { return 0 }
+        let start = name.index(name.startIndex, offsetBy: prefix.count)
+        let end = name.index(name.endIndex, offsetBy: -suffix.count)
+        guard start <= end, let value = Int(name[start..<end]) else { return 0 }
+        return value
     }
 }

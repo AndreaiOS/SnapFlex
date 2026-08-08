@@ -60,7 +60,7 @@ final class PhotoCaptureCoordinator: NSObject, AVCapturePhotoCaptureDelegate {
                      didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         guard error == nil, let data = photo.fileDataRepresentation() else { return }
         resources.append(CaptureResource(kind: photo.isRawPhoto ? .rawDNG : .processedHEIF,
-                                         data: data))
+                                         data: data, frameIndex: photo.sequenceCount))
     }
 
     func photoOutput(_ output: AVCapturePhotoOutput,

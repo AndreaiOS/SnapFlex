@@ -100,8 +100,22 @@ final class FakePhotoLibrary: PhotoLibraryProtocol {
             return
         }
 
-        let rawExists = fm.fileExists(atPath: groupDir.appendingPathComponent("raw.dng").path)
-        let heifExists = fm.fileExists(atPath: groupDir.appendingPathComponent("processed.heic").path)
+        let rawExists = fm.fileExists(atPath: groupDir.appendingPathComponent("raw-0.dng").path)
+        let heifExists = fm.fileExists(atPath: groupDir.appendingPathComponent("processed-0.heic").path)
         #expect(rawExists && heifExists)
+    }
+
+    @Test func bracketFramesSaveAsSeparateAssets() async {
+        let (store, library, _) = makeStore(authorized: true)
+        let frames = [
+            CaptureResource(kind: .rawDNG, data: Data([1]), frameIndex: 1),
+            CaptureResource(kind: .rawDNG, data: Data([2]), frameIndex: 2),
+            CaptureResource(kind: .rawDNG, data: Data([3]), frameIndex: 3),
+        ]
+        await store.store(frames)
+        #expect(library.saved.count == 3)
+        for saved in library.saved {
+            #expect(saved.count == 1)
+        }
     }
 }
