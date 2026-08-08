@@ -579,7 +579,9 @@ Note for the implementer: if the readout test shows the HEIF is produced but mir
 - [ ] **Step 2:** Full app suite green.
 - [ ] **Step 3: Commit** — `git add Overlay/ Engine/ && git commit -m "refactor(engine): centralize video frame fan-out in the engine"`
 
----### Task 5: LongExposureController
+---
+
+### Task 5: LongExposureController
 
 **Files:**
 - Create: `LongExposure/LongExposureController.swift`
