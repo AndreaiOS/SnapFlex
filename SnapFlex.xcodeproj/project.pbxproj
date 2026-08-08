@@ -30,6 +30,7 @@
 		8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537E1319B1EEC5386E46AF9B /* CameraDevice.swift */; };
 		9A7B9845893A8AD73F6F45B1 /* PermissionGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A175F8825986D9B794759E53 /* PermissionGate.swift */; };
 		9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAAD47BC23E172EC9ECB96C0 /* Theme.swift */; };
+		A1B08382184A1B65BEAC95DF /* DeviceSettingsReproTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56FBE2514C4CDD6C61F1856 /* DeviceSettingsReproTests.swift */; };
 		B853A8F9BBE932A0E887E335 /* SnapFlexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */; };
 		B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */; };
 		BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A3D069FD29E60E67240457 /* OverlayFrameDriver.swift */; };
@@ -94,6 +95,7 @@
 		D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		E19500F32976684BCFADBA6C /* ShaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderTests.swift; sourceTree = "<group>"; };
 		F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealCameraDevice.swift; sourceTree = "<group>"; };
+		F56FBE2514C4CDD6C61F1856 /* DeviceSettingsReproTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSettingsReproTests.swift; sourceTree = "<group>"; };
 		FB27654374FCFD6F00971A2B /* LongExposureHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureHUD.swift; sourceTree = "<group>"; };
 		FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -177,6 +179,7 @@
 			children = (
 				0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */,
 				FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */,
+				F56FBE2514C4CDD6C61F1856 /* DeviceSettingsReproTests.swift */,
 				0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */,
 				B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */,
 				96B1E47887DC0A63934CF5AA /* LongControllerTests.swift */,
@@ -340,6 +343,7 @@
 			files = (
 				594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */,
 				D8CD8F617A9A903B42031249 /* CaptureStoreTests.swift in Sources */,
+				A1B08382184A1B65BEAC95DF /* DeviceSettingsReproTests.swift in Sources */,
 				67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */,
 				E4705DE7239E225FA24A05EF /* LongAccumulatorTests.swift in Sources */,
 				09B41C74FC91F2399BA9B1DE /* LongControllerTests.swift in Sources */,
