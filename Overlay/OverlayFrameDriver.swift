@@ -7,20 +7,13 @@ final class OverlayFrameDriver {
     let commandQueue: MTLCommandQueue
     private let pipeline: OverlayPipeline
     private var textureCache: CVMetalTextureCache?
-    private var attachFrames: (((CVPixelBuffer) -> Void)?) -> Void = { _ in }
 
     var onHistogram: (([UInt32]) -> Void)?
     var maskTexture: MTLTexture? { pipeline.maskTexture }
 
     var settings: OverlaySettings {
         get { pipeline.settings }
-        set {
-            let wasEnabled = pipeline.settings.anyEnabled
-            pipeline.settings = newValue
-            if newValue.anyEnabled != wasEnabled {
-                attachFrames(newValue.anyEnabled ? { [weak self] in self?.handle($0) } : nil)
-            }
-        }
+        set { pipeline.settings = newValue }
     }
 
     init?() {
@@ -33,15 +26,7 @@ final class OverlayFrameDriver {
         CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
     }
 
-    /// Supply the device hook that attaches/detaches the video data output.
-    func bind(attach: @escaping (((CVPixelBuffer) -> Void)?) -> Void) {
-        attachFrames = attach
-        if pipeline.settings.anyEnabled {
-            attach { [weak self] in self?.handle($0) }
-        }
-    }
-
-    private func handle(_ pixelBuffer: CVPixelBuffer) {
+    func ingest(_ pixelBuffer: CVPixelBuffer) {
         guard let cache = textureCache else { return }
         let width = CVPixelBufferGetWidth(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)

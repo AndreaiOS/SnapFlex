@@ -1,3 +1,4 @@
+import CoreVideo
 import Foundation
 import Observation
 import SnapFlexCore
@@ -6,6 +7,7 @@ import SnapFlexCore
 final class CameraEngine {
     private let device: CameraDeviceProtocol
     private let overlayDriver: OverlayFrameDriver?
+    private let realDevice: RealCameraDevice?
 
     private(set) var values = ManualValues(iso: nil, shutterSeconds: nil,
                                            focusPosition: nil, wbKelvin: nil, evBias: 0)
@@ -24,16 +26,28 @@ final class CameraEngine {
     var bracketStepEV: Float = 1.0
     var flashOn = false
     var overlaySettings: OverlaySettings = .allOff {
-        didSet { overlayDriver?.settings = overlaySettings }
+        didSet {
+            overlayDriver?.settings = overlaySettings
+            updateFrameTap()
+        }
     }
     var longMode: LongMode = .off
     var longBlend: LongBlend = .nd
+
+    /// Set by the app wiring (Task 5); invoked on videoQueue with each camera frame
+    /// while a long-exposure session is running.
+    var longFrameTap: ((CVPixelBuffer) -> Void)?
+    private(set) var longExposureRunning = false
+    private var frameTapActive = false
+    /// The (overlay, long) configuration baked into the currently installed handler.
+    private var installedTap: (overlay: Bool, long: Bool) = (false, false)
 
     private var didLockAE = false
 
     init(device: CameraDeviceProtocol, overlayDriver: OverlayFrameDriver? = nil) {
         self.device = device
         self.overlayDriver = overlayDriver
+        self.realDevice = device as? RealCameraDevice
         device.onStatusChange = { [weak self] newStatus in
             if Thread.isMainThread {
                 MainActor.assumeIsolated { self?.status = newStatus }
@@ -44,12 +58,12 @@ final class CameraEngine {
         device.onControlEvent = { [weak self] event in
             Task { @MainActor in self?.handleControlEvent(event) }
         }
-        if let overlayDriver, let realDevice = device as? RealCameraDevice {
-            overlayDriver.bind { handler in realDevice.setVideoFrameHandler(handler) }
+        if let overlayDriver {
             overlayDriver.onHistogram = { [weak self] bins in
                 Task { @MainActor in self?.histogramBins = bins }
             }
         }
+        updateFrameTap()
     }
 
     func start() {
@@ -187,6 +201,46 @@ final class CameraEngine {
         }
         if values.iso != nil || values.shutterSeconds != nil {
             applyExposure()   // restore custom exposure the lock overrode
+        }
+    }
+
+    /// Begin routing camera frames to `tap` (in addition to the overlay driver, if active).
+    func beginLongFrames(tap: @escaping (CVPixelBuffer) -> Void) {
+        longFrameTap = tap
+        longExposureRunning = true
+        updateFrameTap()
+    }
+
+    func endLongFrames() {
+        longExposureRunning = false
+        longFrameTap = nil
+        updateFrameTap()
+    }
+
+    // MARK: - Frame fan-out
+
+    /// Reinstalls the device's video frame handler whenever the desired fan-out
+    /// configuration (overlay enabled / long-exposure running) changes, so the
+    /// closure installed on the device always matches current engine state.
+    /// Frames arrive on videoQueue, so the closure captures its targets directly
+    /// at install time rather than reading mutable engine state from the queue.
+    private func updateFrameTap() {
+        let overlayEnabled = overlaySettings.anyEnabled
+        let longRunning = longExposureRunning
+        let desired = overlayEnabled || longRunning
+        guard (overlayEnabled, longRunning) != installedTap else { return }
+        frameTapActive = desired
+        installedTap = (overlayEnabled, longRunning)
+        guard let realDevice else { return }
+        guard desired else {
+            realDevice.setVideoFrameHandler(nil)
+            return
+        }
+        let overlayDriver = overlayEnabled ? self.overlayDriver : nil
+        let tap = longRunning ? self.longFrameTap : nil
+        realDevice.setVideoFrameHandler { pixelBuffer in
+            overlayDriver?.ingest(pixelBuffer)
+            tap?(pixelBuffer)
         }
     }
 }
