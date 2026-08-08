@@ -48,9 +48,23 @@ struct ViewfinderScreen: View {
     @State private var zoomBase: Double = 1
     @State private var orientation = OrientationModel()
     @State private var longController = LongExposureController()
+    @State private var chrome = ChromeVisibility()
+    @State private var chromeTask: Task<Void, Never>?
     @Environment(\.scenePhase) private var scenePhase
 
     private var isLongExposing: Bool { longController?.isExposing == true }
+
+    private var chromeBlocked: Bool {
+        selected != nil || isLongExposing || countdown != nil || engine.status == .interrupted
+    }
+
+    private var chromeHidden: Bool { chrome.state == .minimal }
+
+    private func chromeInteraction() {
+        withAnimation(Theme.motion(Theme.springBouncy)) {
+            chrome.interaction(at: Date().timeIntervalSinceReferenceDate)
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -100,18 +114,23 @@ struct ViewfinderScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
-                       showGrid: $showGrid, showLevel: $showLevel,
-                       rotation: orientation.uiAngle,
-                       longAvailable: longController != nil)
-                    .disabled(isLongExposing)
-                    .opacity(isLongExposing ? 0.4 : 1)
-                if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
-                    HStack {
-                        Spacer()
-                        HistogramView(bins: bins).padding(8)
+                Group {
+                    TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
+                           showGrid: $showGrid, showLevel: $showLevel,
+                           rotation: orientation.uiAngle,
+                           longAvailable: longController != nil)
+                        .disabled(isLongExposing)
+                        .opacity(isLongExposing ? 0.4 : 1)
+                    if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
+                        HStack {
+                            Spacer()
+                            HistogramView(bins: bins).padding(8)
+                        }
                     }
                 }
+                .opacity(chromeHidden ? 0 : 1)
+                .allowsHitTesting(!chromeHidden)
+                .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
                 Spacer()
                 if let longController, longController.isExposing {
                     LongExposureHUD(controller: longController)
@@ -128,14 +147,51 @@ struct ViewfinderScreen: View {
                 }
                 .disabled(isLongExposing)
                 .opacity(isLongExposing ? 0.4 : 1)
+                .opacity(chromeHidden ? 0 : 1)
+                .allowsHitTesting(!chromeHidden)
+                .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
                 bottomRow
                     .padding(.vertical, 10)
                     .background(Theme.chrome)
             }
+
+            if chromeHidden {
+                Text(chromeReadout(values: engine.values, longMode: engine.longMode,
+                                    longBlend: engine.longBlend, processing: engine.processingLevel))
+                    .font(Theme.valueFont(11))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Theme.chrome)
+                    .clipShape(Capsule())
+                    .rotatesWithDevice(orientation.uiAngle)
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            }
         }
         .statusBarHidden()
-        .onAppear { orientation.start() }
-        .onDisappear { orientation.stop() }
+        .onAppear {
+            orientation.start()
+            chrome.blocked = chromeBlocked
+            chromeTask = Task {
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .milliseconds(500))
+                    chrome.tick(now: Date().timeIntervalSinceReferenceDate)
+                }
+            }
+        }
+        .onDisappear {
+            orientation.stop()
+            chromeTask?.cancel()
+            chromeTask = nil
+        }
+        .onChange(of: chromeBlocked) { _, blocked in
+            chrome.blocked = blocked
+        }
+        .onChange(of: engine.values) { _, _ in
+            chromeInteraction()
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { longController?.interrupted() }
         }
@@ -159,6 +215,10 @@ struct ViewfinderScreen: View {
                                        engine.ranges.zoom.lowerBound),
                                    engine.ranges.zoom.upperBound)
                 }
+        )
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in chromeInteraction() }
         )
     }
 
@@ -187,6 +247,9 @@ struct ViewfinderScreen: View {
             .buttonStyle(.plain)
             .disabled(isLongExposing)
             .opacity(isLongExposing ? 0.4 : 1)
+            .opacity(chromeHidden ? 0 : 1)
+            .allowsHitTesting(!chromeHidden)
+            .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
             Spacer()
             ZStack {
                 if let longController, longController.isExposing {
@@ -201,6 +264,8 @@ struct ViewfinderScreen: View {
                         .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 4).padding(-5))
                 }
                 .buttonStyle(.plain)
+                .scaleEffect(chromeHidden ? 54.0 / 62.0 : 1)
+                .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
             }
             Spacer()
             HStack(spacing: 6) {
@@ -223,11 +288,15 @@ struct ViewfinderScreen: View {
             }
             .disabled(isLongExposing)
             .opacity(isLongExposing ? 0.4 : 1)
+            .opacity(chromeHidden ? 0 : 1)
+            .allowsHitTesting(!chromeHidden)
+            .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
         }
         .padding(.horizontal, 20)
     }
 
     func takePhoto() {
+        chromeInteraction()
         if let longController, engine.longMode != .off || longController.isExposing {
             countdownTask?.cancel()
             countdownTask = nil
