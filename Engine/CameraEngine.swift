@@ -37,6 +37,9 @@ final class CameraEngine {
                 Task { @MainActor in self?.status = newStatus }
             }
         }
+        device.onControlEvent = { [weak self] event in
+            Task { @MainActor in self?.handleControlEvent(event) }
+        }
         if let overlayDriver, let realDevice = device as? RealCameraDevice {
             overlayDriver.bind { handler in realDevice.setVideoFrameHandler(handler) }
             overlayDriver.onHistogram = { [weak self] bins in
@@ -54,6 +57,14 @@ final class CameraEngine {
     }
 
     func stop() { device.stop() }
+
+    private func handleControlEvent(_ event: CameraControlEvent) {
+        switch event {
+        case .iso(let value): setISO(value)
+        case .shutterSeconds(let seconds): setShutter(seconds)
+        case .evBias(let bias): setEVBias(bias)
+        }
+    }
 
     private func refreshFromDevice() {
         ranges = device.ranges

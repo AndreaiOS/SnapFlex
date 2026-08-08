@@ -13,6 +13,7 @@ final class FakeCameraDevice: CameraDeviceProtocol {
     var ranges: ParameterRanges { rangesByLens[activeLens]! }
     var capabilities = DeviceCapabilities(supportsProRAW: true, supportsBayerRAW: true)
     var onStatusChange: ((SessionStatus) -> Void)?
+    var onControlEvent: ((CameraControlEvent) -> Void)?
 
     // Recording
     var started = false

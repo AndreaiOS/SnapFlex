@@ -5,6 +5,14 @@ enum SessionStatus: Equatable {
     case notRunning, running, interrupted, denied
 }
 
+/// A manual-parameter change made from hardware camera controls
+/// (Camera Control light-press sliders on supported devices).
+enum CameraControlEvent: Equatable {
+    case iso(Float)
+    case shutterSeconds(Double)
+    case evBias(Float)
+}
+
 struct CaptureResource: Equatable {
     enum Kind: Equatable { case rawDNG, processedHEIF }
     let kind: Kind
@@ -24,6 +32,7 @@ protocol CameraDeviceProtocol: AnyObject {
     var ranges: ParameterRanges { get }
     var capabilities: DeviceCapabilities { get }
     var onStatusChange: ((SessionStatus) -> Void)? { get set }
+    var onControlEvent: ((CameraControlEvent) -> Void)? { get set }
     func start()
     func stop()
     func switchTo(_ lens: LensKind)

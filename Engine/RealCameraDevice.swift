@@ -17,7 +17,9 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     private var activeCoordinators: [UUID: PhotoCaptureCoordinator] = [:]
 
     var onStatusChange: ((SessionStatus) -> Void)?
+    var onControlEvent: ((CameraControlEvent) -> Void)?
     private(set) var activeLens: LensKind = .wide
+    private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
 
     override init() {
         super.init()
@@ -85,6 +87,10 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
             videoOutput.videoSettings =
                 [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
             videoOutput.alwaysDiscardsLateVideoFrames = true
+            if session.supportsControls {
+                session.setControlsDelegate(self, queue: sessionQueue)
+            }
+            if let device = currentDevice { configureControls(for: device) }
             session.commitConfiguration()
             session.startRunning()
             notifyStatus(.running)
@@ -108,6 +114,7 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
             currentInput = input
             currentDevice = device
             activeLens = lens
+            rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
         }
     }
 
@@ -115,8 +122,58 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
         sessionQueue.sync { [self] in
             session.beginConfiguration()
             attach(lens: lens)
+            if let device = currentDevice { configureControls(for: device) }
             session.commitConfiguration()
         }
+    }
+
+    // MARK: - Camera Control (hardware button on supported devices)
+
+    /// Rebuilds the light-press controls for the active device: system zoom
+    /// slider plus EV/ISO sliders and a shutter picker routed through
+    /// `onControlEvent` so the engine stays the single source of truth.
+    private func configureControls(for device: AVCaptureDevice) {
+        guard session.supportsControls else { return }
+        for control in session.controls { session.removeControl(control) }
+
+        let format = device.activeFormat
+        let zoom = AVCaptureSystemZoomSlider(device: device)
+
+        let ev = AVCaptureSlider("Exposure", symbolName: "plusminus.circle",
+                                 in: device.minExposureTargetBias...device.maxExposureTargetBias)
+        ev.setActionQueue(sessionQueue) { [weak self] value in
+            self?.onControlEvent?(.evBias(value))
+        }
+
+        let iso = AVCaptureSlider("ISO", symbolName: "camera.aperture",
+                                  in: format.minISO...format.maxISO)
+        iso.setActionQueue(sessionQueue) { [weak self] value in
+            self?.onControlEvent?(.iso(value))
+        }
+
+        let shutterValues = Self.shutterStops(
+            in: format.minExposureDuration.seconds...format.maxExposureDuration.seconds)
+        let shutter = AVCaptureIndexPicker("Shutter", symbolName: "timer",
+                                           localizedIndexTitles: shutterValues.map(Self.shutterLabel))
+        shutter.setActionQueue(sessionQueue) { [weak self] index in
+            guard shutterValues.indices.contains(index) else { return }
+            self?.onControlEvent?(.shutterSeconds(shutterValues[index]))
+        }
+
+        for control in [zoom, ev, iso, shutter] as [AVCaptureControl]
+        where session.canAddControl(control) {
+            session.addControl(control)
+        }
+    }
+
+    static func shutterStops(in range: ClosedRange<Double>) -> [Double] {
+        let stops: [Double] = [1.0/8000, 1.0/4000, 1.0/2000, 1.0/1000, 1.0/500, 1.0/250,
+                               1.0/125, 1.0/60, 1.0/30, 1.0/15, 1.0/8, 1.0/4, 1.0/2, 1.0]
+        return stops.filter { range.contains($0) }
+    }
+
+    static func shutterLabel(_ seconds: Double) -> String {
+        seconds >= 0.35 ? String(format: "%.1fs", seconds) : "1/\(Int((1.0 / seconds).rounded()))"
     }
 
     private func withLockedDevice(_ body: @escaping (AVCaptureDevice) -> Void) {
@@ -241,9 +298,23 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
                 self?.sessionQueue.async { self?.activeCoordinators[id] = nil }
             }
             activeCoordinators[id] = coordinator
+            if let coordinator = rotationCoordinator {
+                let angle = coordinator.videoRotationAngleForHorizonLevelCapture
+                if let connection = photoOutput.connection(with: .video),
+                   connection.isVideoRotationAngleSupported(angle) {
+                    connection.videoRotationAngle = angle
+                }
+            }
             photoOutput.capturePhoto(with: settings, delegate: coordinator)
         }
     }
+}
+
+extension RealCameraDevice: AVCaptureSessionControlsDelegate {
+    func sessionControlsDidBecomeActive(_ session: AVCaptureSession) {}
+    func sessionControlsWillEnterFullscreenAppearance(_ session: AVCaptureSession) {}
+    func sessionControlsWillExitFullscreenAppearance(_ session: AVCaptureSession) {}
+    func sessionControlsDidBecomeInactive(_ session: AVCaptureSession) {}
 }
 
 extension RealCameraDevice: AVCaptureVideoDataOutputSampleBufferDelegate {

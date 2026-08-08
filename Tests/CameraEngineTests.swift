@@ -10,6 +10,17 @@ import SnapFlexCore
         return (engine, device)
     }
 
+    @Test func controlEventsUpdateEngineState() async throws {
+        let (engine, device) = makeEngine()
+        device.onControlEvent?(.iso(400))
+        device.onControlEvent?(.shutterSeconds(1.0 / 60))
+        device.onControlEvent?(.evBias(1.5))
+        try await Task.sleep(for: .milliseconds(100))   // events hop through Task { @MainActor }
+        #expect(engine.values.iso == 400)
+        #expect(engine.values.shutterSeconds == 1.0 / 60)
+        #expect(engine.values.evBias == 1.5)
+    }
+
     @Test func startPublishesDeviceState() {
         let (engine, device) = makeEngine()
         #expect(engine.status == .running)
