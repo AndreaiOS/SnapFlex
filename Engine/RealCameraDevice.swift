@@ -192,6 +192,10 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
                 if !session.outputs.contains(videoOutput), session.canAddOutput(videoOutput) {
                     session.addOutput(videoOutput)
                     videoOutput.setSampleBufferDelegate(self, queue: videoQueue)
+                    if let connection = videoOutput.connection(with: .video),
+                       connection.isVideoRotationAngleSupported(90) {
+                        connection.videoRotationAngle = 90
+                    }
                 }
             } else if session.outputs.contains(videoOutput) {
                 session.removeOutput(videoOutput)

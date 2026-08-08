@@ -26,6 +26,8 @@ struct ViewfinderScreen: View {
                 .ignoresSafeArea()
             if let driver, engine.overlaySettings.peakingEnabled || engine.overlaySettings.zebraEnabled {
                 OverlayMetalView(driver: driver)
+                    .aspectRatio(3.0 / 4.0, contentMode: .fit)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
