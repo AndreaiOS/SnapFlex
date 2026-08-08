@@ -121,4 +121,13 @@ import SnapFlexCore
         let applied = device.appliedExposures.last!
         #expect(applied.iso == 400)           // custom exposure re-applied after unlock
     }
+
+    @Test func controlEventsIgnoredDuringLongExposure() async throws {
+        let (engine, device) = makeEngine()
+        engine.beginLongFrames { _ in }
+        device.onControlEvent?(.iso(800))
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(engine.values.iso == nil)
+        engine.endLongFrames()
+    }
 }

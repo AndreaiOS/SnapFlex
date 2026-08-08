@@ -77,6 +77,7 @@ final class CameraEngine {
     func stop() { device.stop() }
 
     private func handleControlEvent(_ event: CameraControlEvent) {
+        guard !longExposureRunning else { return }
         switch event {
         case .iso(let value): setISO(value)
         case .shutterSeconds(let seconds): setShutter(seconds)
