@@ -55,6 +55,7 @@ struct ViewfinderScreen: View {
     @State private var pendingSaves = 0
     @State private var captureInFlight = false
     @State private var captureFailed = false
+    @State private var displayZoom: Double = 1
     @Environment(\.scenePhase) private var scenePhase
 
     private var isLongExposing: Bool { longController?.isExposing == true }
@@ -270,17 +271,31 @@ struct ViewfinderScreen: View {
                 .onChanged { value in
                     guard !isLongExposing else { return }
                     engine.setZoom(zoomBase * value.magnification)
+                    displayZoom = min(max(zoomBase * value.magnification,
+                                          engine.ranges.zoom.lowerBound),
+                                      engine.ranges.zoom.upperBound)
                 }
                 .onEnded { value in
                     guard !isLongExposing else { return }
                     zoomBase = min(max(zoomBase * value.magnification,
                                        engine.ranges.zoom.lowerBound),
                                    engine.ranges.zoom.upperBound)
+                    displayZoom = zoomBase
                 }
         )
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in chromeInteractionThrottled() }
+        )
+        .simultaneousGesture(
+            TapGesture(count: 2).onEnded {
+                guard !isLongExposing else { return }
+                let target: Double = zoomBase > 1.5 ? 1.0 : 2.0
+                engine.setZoom(target)
+                zoomBase = target
+                displayZoom = target
+                Haptics.light()
+            }
         )
     }
 
@@ -408,10 +423,13 @@ struct ViewfinderScreen: View {
                 Button {
                     engine.setZoom(1)
                     zoomBase = 1
+                    displayZoom = 1
                 } label: {
-                    Text(String(format: "%.1f\u{00D7}", zoomBase))
+                    Text(String(format: "%.1f\u{00D7}", displayZoom))
                         .font(Theme.valueFont(11))
-                        .foregroundStyle(zoomBase == 1 ? .white : Theme.accent)
+                        .foregroundStyle(displayZoom == 1 ? .white : Theme.accent)
+                        .contentTransition(.numericText())
+                        .animation(Theme.motion(Theme.springStandard), value: displayZoom)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
                         .background(Color.white.opacity(0.1))
@@ -423,6 +441,7 @@ struct ViewfinderScreen: View {
                     Button {
                         engine.selectLens(lens)
                         zoomBase = 1
+                        displayZoom = 1
                     } label: {
                         Text(lens.displayName)
                             .font(Theme.valueFont(11))
@@ -471,6 +490,7 @@ struct ViewfinderScreen: View {
         countdownTask = Task {
             while case .counting(let remaining) = timer.state {
                 countdown = remaining
+                Haptics.light()
                 try? await Task.sleep(for: .seconds(1))
                 if Task.isCancelled { return }
                 timer.tick()

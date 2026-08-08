@@ -25,6 +25,13 @@ struct GridLevelOverlay: View {
     let showLevel: Bool
     @State private var level = LevelModel()
 
+    /// Level means aligned with the physical horizon in ANY orientation:
+    /// deviation is measured from the nearest multiple of 90 degrees.
+    private var isLevel: Bool {
+        let nearest = (level.roll / 90).rounded() * 90
+        return abs(level.roll - nearest) < 1
+    }
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -40,7 +47,6 @@ struct GridLevelOverlay: View {
                     .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                 }
                 if showLevel {
-                    let isLevel = abs(level.roll) < 1
                     Rectangle()
                         .fill(isLevel ? Theme.accent : Color.white.opacity(0.7))
                         .frame(width: 90, height: 1.5)
@@ -50,6 +56,9 @@ struct GridLevelOverlay: View {
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .allowsHitTesting(false)
+        .onChange(of: isLevel) { _, nowLevel in
+            if nowLevel && showLevel { Haptics.light() }
+        }
         .onAppear { if showLevel { level.start() } }
         .onDisappear { level.stop() }
         .onChange(of: showLevel) { _, isOn in isOn ? level.start() : level.stop() }
