@@ -48,6 +48,9 @@ final class CameraEngine {
     func start() {
         device.start()
         refreshFromDevice()
+        if formatSelection.raw == .proRAW && !capabilities.supportsProRAW {
+            formatSelection.raw = capabilities.supportsBayerRAW ? .bayer : .off
+        }
     }
 
     func stop() { device.stop() }
