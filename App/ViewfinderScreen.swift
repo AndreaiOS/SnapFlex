@@ -19,6 +19,7 @@ struct ViewfinderScreen: View {
     @State private var countdownTask: Task<Void, Never>?
     @State private var lastThumbnail: UIImage?
     @State private var zoomBase: Double = 1
+    @State private var orientation = OrientationModel()
 
     var body: some View {
         ZStack {
@@ -40,6 +41,7 @@ struct ViewfinderScreen: View {
                 Text("\(countdown)")
                     .font(Theme.valueFont(64))
                     .foregroundStyle(Theme.accent)
+                    .rotatesWithDevice(orientation.uiAngle)
                     .allowsHitTesting(false)
             }
 
@@ -61,7 +63,8 @@ struct ViewfinderScreen: View {
 
             VStack(spacing: 0) {
                 TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
-                       showGrid: $showGrid, showLevel: $showLevel)
+                       showGrid: $showGrid, showLevel: $showLevel,
+                       rotation: orientation.uiAngle)
                 if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
                     HStack {
                         Spacer()
@@ -72,7 +75,8 @@ struct ViewfinderScreen: View {
                 if let parameter = selected {
                     ParameterDial(engine: engine, parameter: parameter)
                 }
-                ParameterBar(engine: engine, selected: $selected)
+                ParameterBar(engine: engine, selected: $selected,
+                             rotation: orientation.uiAngle)
                     .padding(.vertical, 8)
                     .background(Theme.chrome)
                 bottomRow
@@ -81,6 +85,8 @@ struct ViewfinderScreen: View {
             }
         }
         .statusBarHidden()
+        .onAppear { orientation.start() }
+        .onDisappear { orientation.stop() }
         .gesture(
             MagnifyGesture()
                 .onChanged { value in
@@ -101,17 +107,20 @@ struct ViewfinderScreen: View {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                if let lastThumbnail {
-                    Image(uiImage: lastThumbnail)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 40, height: 40)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                } else {
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(white: 0.2))
-                        .frame(width: 40, height: 40)
+                Group {
+                    if let lastThumbnail {
+                        Image(uiImage: lastThumbnail)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 40, height: 40)
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    } else {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color(white: 0.2))
+                            .frame(width: 40, height: 40)
+                    }
                 }
+                .rotatesWithDevice(orientation.uiAngle)
             }
             .buttonStyle(.plain)
             Spacer()
@@ -138,6 +147,7 @@ struct ViewfinderScreen: View {
                             .padding(.vertical, 5)
                             .background(Color.white.opacity(engine.activeLens == lens ? 0.2 : 0.1))
                             .clipShape(Capsule())
+                            .rotatesWithDevice(orientation.uiAngle)
                     }
                     .buttonStyle(.plain)
                 }

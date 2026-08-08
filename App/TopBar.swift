@@ -46,6 +46,7 @@ struct TopBar: View {
     @Binding var timerDuration: Int
     @Binding var showGrid: Bool
     @Binding var showLevel: Bool
+    var rotation: Double = 0
 
     var body: some View {
         HStack(spacing: 8) {
@@ -76,6 +77,7 @@ struct TopBar: View {
                 .padding(.vertical, 4)
                 .background(Color.white.opacity(0.12))
                 .clipShape(Capsule())
+                .rotatesWithDevice(rotation)
         }
         .buttonStyle(.plain)
     }
@@ -94,6 +96,7 @@ struct TopBar: View {
             Image(systemName: "slider.horizontal.3")
                 .foregroundStyle(Theme.accent)
                 .padding(6)
+                .rotatesWithDevice(rotation)
         }
     }
 

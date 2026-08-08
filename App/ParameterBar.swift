@@ -18,6 +18,7 @@ enum SelectedParameter: CaseIterable {
 struct ParameterBar: View {
     let engine: CameraEngine
     @Binding var selected: SelectedParameter?
+    var rotation: Double = 0
 
     var body: some View {
         HStack(spacing: 2) {
@@ -47,6 +48,7 @@ struct ParameterBar: View {
                     .font(Theme.valueFont(13))
                     .foregroundStyle(isManual || isSelected ? Theme.accent : Theme.inactiveText)
             }
+            .rotatesWithDevice(rotation)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 5)
             .background(isSelected ? Theme.accent.opacity(0.15) : .clear)
