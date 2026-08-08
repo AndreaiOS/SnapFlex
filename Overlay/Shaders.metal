@@ -88,11 +88,12 @@ fragment float4 overlayFragment(OverlayVertexOut in [[stage_in]],
         color = float3(0.29, 0.87, 0.50);
         alpha = 0.9;
     } else if (m.g > 0.5) {
-        // Zebra: diagonal stripes, 8px pitch in mask space
+        // Zebra: dark diagonal stripes, 8px pitch — must stay visible on blown-out
+        // (white) highlights, so the stripes are black, not white
         float stripe = fmod(in.position.x + in.position.y, 16.0);
         if (stripe < 8.0) {
-            color = float3(1.0);
-            alpha = 0.7;
+            color = float3(0.0);
+            alpha = 0.6;
         }
     }
     return float4(color * alpha, alpha);   // premultiplied
