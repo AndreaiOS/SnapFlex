@@ -4,6 +4,7 @@ import Foundation
 
 final class FakePhotoLibrary: PhotoLibraryProtocol {
     var isAuthorized = true
+    var isDenied = false
     var saved: [[CaptureResource]] = []
     var failNextSave = false
     var grantsOnRequest = false
@@ -32,6 +33,13 @@ final class FakePhotoLibrary: PhotoLibraryProtocol {
 
     let sample = [CaptureResource(kind: .rawDNG, data: Data([1, 2])),
                   CaptureResource(kind: .processedHEIF, data: Data([3]))]
+
+    @Test func saveBlockedReflectsDeniedLibrary() {
+        let (store, library, _) = makeStore(authorized: false)
+        #expect(store.saveBlocked == false)
+        library.isDenied = true
+        #expect(store.saveBlocked == true)
+    }
 
     @Test func authorizedSavesDirectly() async {
         let (store, library, _) = makeStore(authorized: true)

@@ -51,6 +51,8 @@ struct ViewfinderScreen: View {
     @State private var longController = LongExposureController()
     @State private var chrome = ChromeVisibility()
     @State private var chromeTask: Task<Void, Never>?
+    @State private var photosDenied = false
+    @State private var pendingSaves = 0
     @Environment(\.scenePhase) private var scenePhase
 
     private var isLongExposing: Bool { longController?.isExposing == true }
@@ -126,6 +128,9 @@ struct ViewfinderScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
+                if photosDenied {
+                    photosDeniedBanner
+                }
                 Group {
                     TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
                            showGrid: $showGrid, showLevel: $showLevel,
@@ -173,10 +178,13 @@ struct ViewfinderScreen: View {
                                     longBlend: engine.longBlend, processing: engine.processingLevel))
                     .font(Theme.valueFont(11))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(Theme.chrome)
                     .clipShape(Capsule())
+                    .padding(.horizontal, 16)
                     .rotatesWithDevice(orientation.uiAngle)
                     .allowsHitTesting(false)
                     .transition(.opacity)
@@ -187,6 +195,7 @@ struct ViewfinderScreen: View {
         .statusBarHidden()
         .onAppear {
             orientation.start()
+            refreshSaveState()
             chrome.blocked = chromeBlocked
             chrome.interaction(at: Date().timeIntervalSinceReferenceDate)
             chromeTask = Task {
@@ -211,6 +220,14 @@ struct ViewfinderScreen: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { longController?.interrupted() }
+            if phase == .active {
+                // Delay so the app-level flushSpool (SnapFlexApp) finishes first;
+                // picks up a permission change made in Settings.
+                Task {
+                    try? await Task.sleep(for: .seconds(1))
+                    refreshSaveState()
+                }
+            }
         }
         .onChange(of: engine.status) { _, status in
             if status == .interrupted { longController?.interrupted() }
@@ -237,6 +254,33 @@ struct ViewfinderScreen: View {
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in chromeInteractionThrottled() }
         )
+    }
+
+    /// Always visible (exempt from chrome auto-hide): losing photos silently is
+    /// the one state the UI must never soft-pedal.
+    private var photosDeniedBanner: some View {
+        Button {
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        } label: {
+            Text(pendingSaves > 0
+                 ? "PHOTOS ACCESS OFF · \(pendingSaves) SHOT\(pendingSaves == 1 ? "" : "S") WAITING · TAP FOR SETTINGS"
+                 : "PHOTOS ACCESS OFF · TAP FOR SETTINGS")
+                .font(Theme.valueFont(11))
+                .foregroundStyle(.black)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity)
+                .background(Theme.accent)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func refreshSaveState() {
+        photosDenied = store.saveBlocked
+        pendingSaves = store.spooledCount
     }
 
     private var bottomRow: some View {
@@ -382,6 +426,7 @@ struct ViewfinderScreen: View {
                 let resource = CaptureResource(kind: .processedHEIF, data: data)
                 Task {
                     await store.store([resource])
+                    refreshSaveState()
                     backgroundGuard.end()
                 }
             } else {
@@ -404,7 +449,10 @@ struct ViewfinderScreen: View {
                     thumbnailID += 1
                 }
             }
-            Task { await store.store(resources) }
+            Task {
+                await store.store(resources)
+                refreshSaveState()
+            }
         }
     }
 }

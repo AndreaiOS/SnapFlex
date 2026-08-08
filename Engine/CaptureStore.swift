@@ -5,13 +5,25 @@ import os
 
 protocol PhotoLibraryProtocol {
     var isAuthorized: Bool { get }
+    var isDenied: Bool { get }
     func requestAuthorization() async -> Bool
     func save(_ resources: [CaptureResource]) async throws
+}
+
+extension PhotoLibraryProtocol {
+    var isDenied: Bool { false }
 }
 
 final class PhotoKitLibrary: PhotoLibraryProtocol {
     var isAuthorized: Bool {
         PHPhotoLibrary.authorizationStatus(for: .addOnly) == .authorized
+    }
+
+    var isDenied: Bool {
+        switch PHPhotoLibrary.authorizationStatus(for: .addOnly) {
+        case .denied, .restricted: true
+        default: false
+        }
     }
 
     func requestAuthorization() async -> Bool {
@@ -56,6 +68,9 @@ final class CaptureStore {
         try? fileManager.createDirectory(at: spoolDirectory, withIntermediateDirectories: true)
     }
 
+    /// True when Photos access is explicitly denied or restricted — saves can only spool.
+    var saveBlocked: Bool { library.isDenied }
+
     var spooledCount: Int {
         let contents = (try? fileManager.contentsOfDirectory(at: spoolDirectory,
                                                               includingPropertiesForKeys: nil)) ?? []
@@ -77,6 +92,7 @@ final class CaptureStore {
                 guard library.isAuthorized else { throw CocoaError(.fileWriteNoPermission) }
                 try await library.save(group)
             } catch {
+                logger.error("Photo library save failed, spooling: \(String(describing: error))")
                 spool(group)
             }
         }

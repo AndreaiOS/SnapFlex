@@ -51,26 +51,35 @@ struct TopBar: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            chip(engine.formatSelection.raw.rawValue) { cycleFormat() }
-            chip(engine.processingLevel.rawValue) { engine.processingLevel = engine.processingLevel.next }
-            chip(engine.flashOn ? "FLASH ON" : "FLASH OFF") { engine.flashOn.toggle() }
-            chip(aspect.label) { aspect = next(aspect, in: AspectRatio.allCases) }
-            chip(timerDuration == 0 ? "TIMER OFF" : "\(timerDuration)s") {
-                timerDuration = timerDuration == 0 ? 3 : timerDuration == 3 ? 10 : 0
-            }
-            chip(engine.bracketCount.map { "BKT \($0)" } ?? "BKT OFF") {
-                engine.bracketCount = engine.bracketCount == nil ? 3
-                    : engine.bracketCount == 3 ? 5 : nil
-            }
-            if longAvailable {
-                chip(engine.longMode.label) { engine.longMode = engine.longMode.next }
-                if engine.longMode != .off {
-                    chip(engine.longBlend.rawValue) {
-                        engine.longBlend = engine.longBlend == .nd ? .trails : .nd
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    chip(engine.formatSelection.raw.rawValue,
+                         highlighted: engine.formatSelection.raw != .off) { cycleFormat() }
+                    chip(engine.processingLevel.rawValue) { engine.processingLevel = engine.processingLevel.next }
+                    chip("FLASH", highlighted: engine.flashOn) { engine.flashOn.toggle() }
+                    chip(aspect.label) { aspect = next(aspect, in: AspectRatio.allCases) }
+                    chip(timerDuration == 0 ? "TIMER" : "\(timerDuration)s",
+                         highlighted: timerDuration > 0) {
+                        timerDuration = timerDuration == 0 ? 3 : timerDuration == 3 ? 10 : 0
+                    }
+                    chip(engine.bracketCount.map { "BKT \($0)" } ?? "BKT",
+                         highlighted: engine.bracketCount != nil) {
+                        engine.bracketCount = engine.bracketCount == nil ? 3
+                            : engine.bracketCount == 3 ? 5 : nil
+                    }
+                    if longAvailable {
+                        chip(engine.longMode.label, highlighted: engine.longMode != .off) {
+                            engine.longMode = engine.longMode.next
+                        }
+                        if engine.longMode != .off {
+                            chip(engine.longBlend.rawValue, highlighted: true) {
+                                engine.longBlend = engine.longBlend == .nd ? .trails : .nd
+                            }
+                        }
                     }
                 }
+                .padding(.vertical, 2)
             }
-            Spacer()
             assistMenu
         }
         .padding(.horizontal, 12)
@@ -78,17 +87,20 @@ struct TopBar: View {
         .background(Theme.chrome)
     }
 
-    private func chip(_ text: String, action: @escaping () -> Void) -> some View {
+    private func chip(_ text: String, highlighted: Bool = false,
+                      action: @escaping () -> Void) -> some View {
         Button {
             action()
             Haptics.light()
         } label: {
             Text(text)
                 .font(Theme.valueFont(10))
-                .foregroundStyle(.white)
+                .lineLimit(1)
+                .fixedSize()
+                .foregroundStyle(highlighted ? Theme.accent : .white)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color.white.opacity(0.12))
+                .background(highlighted ? Theme.accent.opacity(0.16) : Color.white.opacity(0.12))
                 .clipShape(Capsule())
                 .rotatesWithDevice(rotation)
                 .contentTransition(.numericText())
