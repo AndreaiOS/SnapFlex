@@ -230,9 +230,11 @@ struct ViewfinderScreen: View {
     }
 
     private func startLongExposure(_ controller: LongExposureController) {
+        UIApplication.shared.isIdleTimerDisabled = true
         engine.prepareLongExposure()
         engine.beginLongFrames { buffer in controller.ingest(buffer) }
         controller.start(mode: engine.longMode, blend: engine.longBlend) { data in
+            UIApplication.shared.isIdleTimerDisabled = false
             engine.endLongFrames()
             engine.endLongExposure()
             if let data {
