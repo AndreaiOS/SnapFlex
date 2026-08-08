@@ -13,7 +13,7 @@ final class LevelModel {
         motion.deviceMotionUpdateInterval = 1.0 / 15.0
         motion.startDeviceMotionUpdates(to: .main) { [weak self] data, _ in
             guard let data else { return }
-            self?.roll = data.attitude.roll * 180 / .pi
+            self?.roll = atan2(data.gravity.x, -data.gravity.y) * 180 / .pi
         }
     }
 
