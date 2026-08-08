@@ -23,6 +23,7 @@
 		65015462886289F1C00BD38C /* ShaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19500F32976684BCFADBA6C /* ShaderTests.swift */; };
 		67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */; };
 		8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537E1319B1EEC5386E46AF9B /* CameraDevice.swift */; };
+		9A7B9845893A8AD73F6F45B1 /* PermissionGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A175F8825986D9B794759E53 /* PermissionGate.swift */; };
 		9E28EBE6C9511EB4FA726248 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAAD47BC23E172EC9ECB96C0 /* Theme.swift */; };
 		B853A8F9BBE932A0E887E335 /* SnapFlexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */; };
 		B94FA2BCB7B531740E1429F9 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */; };
@@ -62,6 +63,7 @@
 		8170FBCBCE94A76D4EE06E7C /* TopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
 		908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SnapFlexTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
+		A175F8825986D9B794759E53 /* PermissionGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionGate.swift; sourceTree = "<group>"; };
 		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
 		BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridLevelOverlay.swift; sourceTree = "<group>"; };
 		BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterBar.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 				621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */,
 				BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */,
 				CC948942CC36FA4AB62B09F3 /* ParameterDial.swift */,
+				A175F8825986D9B794759E53 /* PermissionGate.swift */,
 				457C3AFC05BB91ED93F7640B /* PreviewView.swift */,
 				C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */,
 				CAAD47BC23E172EC9ECB96C0 /* Theme.swift */,
@@ -256,6 +259,7 @@
 				DC7246D978A486118FAF2C2C /* OverlayPipeline.swift in Sources */,
 				17BEE6B2CCF25EECE6441AD4 /* ParameterBar.swift in Sources */,
 				5DF57BC171CB5A74E46CF3CE /* ParameterDial.swift in Sources */,
+				9A7B9845893A8AD73F6F45B1 /* PermissionGate.swift in Sources */,
 				4991237717EB8B060F0121BE /* PhotoCaptureCoordinator.swift in Sources */,
 				E2373E9C1CAC9A8D74EC3F5C /* PreviewView.swift in Sources */,
 				447384718A2AB4FD99063FFE /* RealCameraDevice.swift in Sources */,

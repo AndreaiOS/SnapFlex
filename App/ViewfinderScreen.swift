@@ -40,6 +40,16 @@ struct ViewfinderScreen: View {
                     .allowsHitTesting(false)
             }
 
+            if engine.status == .interrupted {
+                ZStack {
+                    Color.black.opacity(0.7).ignoresSafeArea()
+                    Text("Camera paused")
+                        .font(Theme.valueFont(16))
+                        .foregroundStyle(.white)
+                }
+                .allowsHitTesting(false)
+            }
+
             GridLevelOverlay(showGrid: showGrid, showLevel: showLevel)
                 .ignoresSafeArea()
 

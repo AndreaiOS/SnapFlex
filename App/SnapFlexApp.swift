@@ -18,9 +18,12 @@ struct SnapFlexApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ViewfinderScreen(engine: engine, session: device.session, driver: driver, store: store)
-                .preferredColorScheme(.dark)
-                .onAppear { engine.start() }
+            PermissionGate {
+                ViewfinderScreen(engine: engine, session: device.session,
+                                 driver: driver, store: store)
+                    .onAppear { engine.start() }
+            }
+            .preferredColorScheme(.dark)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
