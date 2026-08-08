@@ -60,7 +60,7 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
         let format = device.activeFormat
         return ParameterRanges(
             iso: format.minISO...format.maxISO,
-            shutterSeconds: format.minExposureDuration.seconds...min(format.maxExposureDuration.seconds, 1.0),
+            shutterSeconds: format.minExposureDuration.seconds...format.maxExposureDuration.seconds,
             evBias: device.minExposureTargetBias...device.maxExposureTargetBias,
             zoom: 1.0...min(device.activeFormat.videoMaxZoomFactor, 10.0))
     }
