@@ -10,6 +10,7 @@ final class OverlayFrameDriver {
 
     var onHistogram: (([UInt32]) -> Void)?
     var maskTexture: MTLTexture? { pipeline.maskTexture }
+    var waveformTexture: MTLTexture? { pipeline.waveformTexture }
 
     var settings: OverlaySettings {
         get { pipeline.settings }

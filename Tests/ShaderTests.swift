@@ -4,18 +4,17 @@ import Metal
 @testable import SnapFlex
 
 @Suite struct ShaderTests {
-    /// 8×8 BGRA texture from per-pixel gray values (0-255).
-    func makeTexture(device: MTLDevice, grays: [UInt8]) -> MTLTexture {
-        let side = 8
-        precondition(grays.count == side * side)
+    /// BGRA texture (default 8×8) from per-pixel gray values (0-255).
+    func makeTexture(device: MTLDevice, width: Int = 8, height: Int = 8, grays: [UInt8]) -> MTLTexture {
+        precondition(grays.count == width * height)
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .bgra8Unorm, width: side, height: side, mipmapped: false)
+            pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)
         descriptor.usage = [.shaderRead]
         let texture = device.makeTexture(descriptor: descriptor)!
         var pixels = [UInt8]()
         for gray in grays { pixels.append(contentsOf: [gray, gray, gray, 255]) }  // BGRA
-        texture.replace(region: MTLRegionMake2D(0, 0, side, side), mipmapLevel: 0,
-                        withBytes: pixels, bytesPerRow: side * 4)
+        texture.replace(region: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0,
+                        withBytes: pixels, bytesPerRow: width * 4)
         return texture
     }
 
@@ -25,6 +24,17 @@ import Metal
                          from: MTLRegionMake2D(0, 0, texture.width, texture.height),
                          mipmapLevel: 0)
         return stride(from: 0, to: bytes.count, by: 4).map { (bytes[$0], bytes[$0 + 1]) }
+    }
+
+    /// Row-major counts from an r32Uint texture (index = row * width + col).
+    func waveformCounts(_ texture: MTLTexture) -> [UInt32] {
+        var counts = [UInt32](repeating: 0, count: texture.width * texture.height)
+        counts.withUnsafeMutableBytes { ptr in
+            texture.getBytes(ptr.baseAddress!, bytesPerRow: texture.width * 4,
+                             from: MTLRegionMake2D(0, 0, texture.width, texture.height),
+                             mipmapLevel: 0)
+        }
+        return counts
     }
 
     func setupPipeline() throws -> (OverlayPipeline, MTLDevice, MTLCommandQueue) {
@@ -78,5 +88,43 @@ import Metal
         let row = Array(mask[8..<16])     // row 1 (avoid border row 0)
         #expect(row[3].r == 255 || row[4].r == 255)   // edge flagged
         #expect(row[1].r == 0)            // flat area not flagged
+    }
+
+    @Test func waveformBinsUniformGray() throws {
+        let (pipeline, device, queue) = try setupPipeline()
+        pipeline.settings = OverlaySettings(peakingEnabled: false, zebraEnabled: false,
+                                            histogramEnabled: false, waveformEnabled: true,
+                                            peakingThreshold: 0.25, zebraThreshold: 0.98)
+        // 50% gray input: every column accumulates all its samples in one row band
+        // (row for luma 0.5 ≈ 63 - 31 = 32; allow ±1 for rounding)
+        let width = 128, height = 64
+        let texture = makeTexture(device: device, width: width, height: height,
+                                  grays: [UInt8](repeating: 128, count: width * height))
+        _ = pipeline.process(texture: texture, commandQueue: queue)
+        let waveform = try #require(pipeline.waveformTexture)
+        #expect(waveform.width == 128)
+        #expect(waveform.height == 64)
+        let counts = waveformCounts(waveform)
+        for col in 0..<128 {
+            var total: UInt32 = 0
+            var inBand: UInt32 = 0
+            for row in 0..<64 {
+                let count = counts[row * 128 + col]
+                total += count
+                if row >= 31 && row <= 33 { inBand += count }
+            }
+            #expect(total > 0)
+            #expect(Double(inBand) >= Double(total) * 0.95)
+        }
+    }
+
+    @Test func waveformDisabledProducesNoTexture() throws {
+        let (pipeline, device, queue) = try setupPipeline()
+        pipeline.settings = OverlaySettings(peakingEnabled: false, zebraEnabled: false,
+                                            histogramEnabled: true, waveformEnabled: false,
+                                            peakingThreshold: 0.25, zebraThreshold: 0.98)
+        let texture = makeTexture(device: device, grays: .init(repeating: 128, count: 64))
+        _ = pipeline.process(texture: texture, commandQueue: queue)
+        #expect(pipeline.waveformTexture == nil)
     }
 }

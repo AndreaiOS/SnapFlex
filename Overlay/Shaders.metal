@@ -62,6 +62,30 @@ kernel void maskKernel(texture2d<float, access::read> input [[texture(0)]],
     output.write(float4(peaking, zebra, 0.0, max(peaking, zebra)), gid);
 }
 
+kernel void waveformAccumulate(texture2d<float, access::read> source [[texture(0)]],
+                               texture2d<uint, access::read_write> waveform [[texture(1)]],
+                               uint2 gid [[thread_position_in_grid]]) {
+    // One thread per OUTPUT column (gid.x in 0..<128); walks a row stripe.
+    if (gid.x >= 128 || gid.y != 0) { return; }
+    uint width = source.get_width();
+    uint height = source.get_height();
+    uint x0 = gid.x * width / 128;
+    uint x1 = (gid.x + 1) * width / 128;
+    // zero this column first
+    for (uint row = 0; row < 64; row++) {
+        waveform.write(uint4(0), uint2(gid.x, row));
+    }
+    for (uint x = x0; x < x1; x++) {
+        for (uint y = 0; y < height; y += 4) {   // stride 4 rows: enough samples, 4x cheaper
+            float4 c = source.read(uint2(x, y));
+            float luma = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+            uint row = 63 - min(uint(luma * 63.0), 63u);   // bright at top (row 0)
+            uint current = waveform.read(uint2(gid.x, row)).r;
+            waveform.write(uint4(current + 1, 0, 0, 0), uint2(gid.x, row));
+    	}
+    }
+}
+
 struct OverlayVertexOut {
     float4 position [[position]];
     float2 uv;
