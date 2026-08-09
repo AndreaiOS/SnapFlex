@@ -56,6 +56,9 @@ struct ViewfinderScreen: View {
     @State private var captureInFlight = false
     @State private var captureFailed = false
     @State private var displayZoom: Double = 1
+    @State private var recipeBook = RecipeBook(data: UserDefaults.standard.data(forKey: "recipes.book") ?? Data())
+    @State private var showSaveRecipeAlert = false
+    @State private var newRecipeName = ""
     @Environment(\.scenePhase) private var scenePhase
 
     private var isLongExposing: Bool { longController?.isExposing == true }
@@ -147,7 +150,11 @@ struct ViewfinderScreen: View {
                     TopBar(engine: engine, aspect: $aspect, timerDuration: $timerDuration,
                            showGrid: $showGrid, showLevel: $showLevel,
                            rotation: orientation.uiAngle,
-                           longAvailable: longController != nil)
+                           longAvailable: longController != nil,
+                           recipes: recipeBook.recipes,
+                           onApplyRecipe: apply,
+                           onSaveRecipe: beginSaveRecipe,
+                           onDeleteRecipe: deleteRecipe)
                         .disabled(isLongExposing)
                         .opacity(isLongExposing ? 0.4 : 1)
                     if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
@@ -309,6 +316,11 @@ struct ViewfinderScreen: View {
         .onChange(of: timerDuration) { _, _ in saveSettings() }
         .onChange(of: showGrid) { _, _ in saveSettings() }
         .onChange(of: showLevel) { _, _ in saveSettings() }
+        .alert("Save recipe", isPresented: $showSaveRecipeAlert) {
+            TextField("Name", text: $newRecipeName)
+            Button("Save") { snapshotRecipe() }
+            Button("Cancel", role: .cancel) {}
+        }
         .onReceive(NotificationCenter.default.publisher(for: ProcessInfo.thermalStateDidChangeNotification)) { _ in
             if ProcessInfo.processInfo.thermalState == .serious || ProcessInfo.processInfo.thermalState == .critical {
                 longController?.interrupted()
@@ -409,6 +421,54 @@ struct ViewfinderScreen: View {
         defaults.set(timerDuration, forKey: "settings.timer")
         defaults.set(showGrid, forKey: "settings.grid")
         defaults.set(showLevel, forKey: "settings.level")
+    }
+
+    // MARK: - Recipes
+
+    private func saveRecipeBook() {
+        UserDefaults.standard.set(recipeBook.encode(), forKey: "recipes.book")
+    }
+
+    private func apply(_ recipe: Recipe) {
+        engine.setISO(recipe.iso)
+        engine.setShutter(recipe.shutterSeconds)
+        engine.setEVBias(recipe.evBias)
+        engine.setWhiteBalance(kelvin: recipe.wbKelvin)
+        engine.formatSelection = FormatSelection(raw: recipe.raw, heifCompanion: recipe.heifCompanion)
+        engine.processingLevel = recipe.processing
+        if AspectRatio.allCases.indices.contains(recipe.aspectIndex) {
+            aspect = AspectRatio.allCases[recipe.aspectIndex]
+        }
+        Haptics.success()
+        chromeInteraction()
+    }
+
+    private func beginSaveRecipe() {
+        newRecipeName = "Recipe \(recipeBook.recipes.count + 1)"
+        showSaveRecipeAlert = true
+    }
+
+    private func snapshotRecipe() {
+        let trimmed = newRecipeName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = trimmed.isEmpty ? "Recipe \(recipeBook.recipes.count + 1)" : trimmed
+        let recipe = Recipe(
+            name: name,
+            iso: engine.values.iso,
+            shutterSeconds: engine.values.shutterSeconds,
+            evBias: engine.values.evBias,
+            wbKelvin: engine.values.wbKelvin,
+            raw: engine.formatSelection.raw,
+            heifCompanion: engine.formatSelection.heifCompanion,
+            processing: engine.processingLevel,
+            aspectIndex: AspectRatio.allCases.firstIndex(of: aspect) ?? 0)
+        recipeBook.add(recipe)
+        saveRecipeBook()
+        Haptics.light()
+    }
+
+    private func deleteRecipe(_ recipe: Recipe) {
+        recipeBook.remove(id: recipe.id)
+        saveRecipeBook()
     }
 
     private var bottomRow: some View {

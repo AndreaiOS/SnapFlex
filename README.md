@@ -64,3 +64,4 @@ not work in the simulator).
 - [ ] Ruler value label has no vertical clipping at 9pt
 - [ ] Waveform tracks scene luminance live; no frame drops with all overlays on
 - [ ] Loupe appears while focusing manually (dial open + MF); magnified center crop is sharp and live
+- [ ] Save a recipe, relaunch, apply: exposure/WB/format/PROC/aspect all restore (clamped to lens limits)

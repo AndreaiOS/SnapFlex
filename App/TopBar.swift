@@ -48,6 +48,10 @@ struct TopBar: View {
     @Binding var showLevel: Bool
     var rotation: Double = 0
     var longAvailable: Bool = true
+    var recipes: [Recipe] = []
+    var onApplyRecipe: (Recipe) -> Void = { _ in }
+    var onSaveRecipe: () -> Void = {}
+    var onDeleteRecipe: (Recipe) -> Void = { _ in }
 
     @State private var batteryLevel: Float = -1
 
@@ -92,10 +96,32 @@ struct TopBar: View {
                 Text("BAT \(Int(batteryLevel * 100))")
                     .foregroundStyle(Color.white.opacity(0.42))
             }
+            recipeMenu
             assistMenu
         }
         .font(Theme.valueFont(8.5))
         .tracking(1.2)
+    }
+
+    private var recipeMenu: some View {
+        let recipeColor: Color = !recipes.isEmpty ? Theme.accent : Color.white.opacity(0.42)
+        return Menu {
+            ForEach(recipes) { recipe in
+                Button(recipe.name) { onApplyRecipe(recipe) }
+            }
+            Divider()
+            Button("Save current…") { onSaveRecipe() }
+            if !recipes.isEmpty {
+                Menu("Delete") {
+                    ForEach(recipes) { recipe in
+                        Button(recipe.name, role: .destructive) { onDeleteRecipe(recipe) }
+                    }
+                }
+            }
+        } label: {
+            Text("RCP")
+                .foregroundStyle(recipeColor)
+        }
     }
 
     // MARK: - Rail
