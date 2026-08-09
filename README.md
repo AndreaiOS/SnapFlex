@@ -47,7 +47,7 @@ not work in the simulator).
 - [ ] RAW + HEIF companion honors the PROC level on the companion
 - [ ] PROC level survives lens switches
 - [ ] PROC persistence across app restarts NOT required (resets to STD)
-- [ ] Chrome fades out after 4s idle; tap reveals with a bounce
+- [ ] Chrome fades out after 20s idle; tap reveals with a bounce
 - [ ] Chrome never hides while dial open, LONG running, or countdown active
 - [ ] Minimal HUD readout matches active settings (e.g. "ISO 200 · 1/120 · ND 15s")
 - [ ] Dial has momentum and snaps to stops with tick haptics
