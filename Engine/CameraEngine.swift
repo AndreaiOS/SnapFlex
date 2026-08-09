@@ -40,6 +40,7 @@ final class CameraEngine {
     /// while a long-exposure session is running.
     var longFrameTap: ((CVPixelBuffer) -> Void)?
     private(set) var longExposureRunning = false
+    private(set) var nightStackRunning = false
     private var frameTapActive = false
     /// The (overlay, long) configuration baked into the currently installed handler.
     private var installedTap: (overlay: Bool, long: Bool) = (false, false)
@@ -212,12 +213,19 @@ final class CameraEngine {
 
     // MARK: - Long Exposure
 
-    func prepareLongExposure() { lockAEIfAuto() }
+    /// No-ops while a night stack is in flight — LONG must not start mid-stack (it would
+    /// re-lock AE over the stack's lock and, on stack completion, `restoreAEAfterLock`
+    /// would unlock AE out from under the still-running LONG session and clear `didLockAE`
+    /// so LONG's own `endLongExposure` later no-ops).
+    func prepareLongExposure() {
+        guard !nightStackRunning else { return }
+        lockAEIfAuto()
+    }
 
     func endLongExposure() { restoreAEAfterLock() }
 
-    /// Shared by `prepareLongExposure` and `captureNightStack`: locks AE only when the
-    /// session is fully automatic (no manual ISO/shutter), remembering to unlock it later.
+    /// Shared by `prepareLongExposure` and `captureNightStack`: locks AE when either ISO or
+    /// shutter is auto (i.e. the session isn't fully manual), remembering to unlock it later.
     private func lockAEIfAuto() {
         if values.iso == nil || values.shutterSeconds == nil {
             device.lockAutoExposure()
@@ -244,9 +252,15 @@ final class CameraEngine {
     /// does not mutate `formatSelection`/`processingLevel`. `onProgress` fires after each
     /// frame is captured; `completion` fires once with the stacked HEIF, or nil on any
     /// capture/decode failure or dimension mismatch (AE is still restored in that case).
+    /// Rejects (`completion(nil)`, no AE touch) if LONG is running or a stack is already
+    /// in flight — `nightStackRunning` holds exclusivity for the whole multi-second stack,
+    /// not just at entry, so a second call can't interleave captures or unlock AE under
+    /// the first.
     func captureNightStack(onProgress: @escaping (Int, Int) -> Void,
                            completion: @escaping (Data?) -> Void) {
         guard !longExposureRunning else { completion(nil); return }
+        guard !nightStackRunning else { completion(nil); return }
+        nightStackRunning = true
         lockAEIfAuto()
         let recipe = CaptureRecipe(raw: .none, includeProcessed: true,
                                    bracketing: nil, processing: .zero)
@@ -299,6 +313,7 @@ final class CameraEngine {
 
     private func finishNightStack(_ data: Data?, completion: @escaping (Data?) -> Void) {
         restoreAEAfterLock()
+        nightStackRunning = false
         completion(data)
     }
 

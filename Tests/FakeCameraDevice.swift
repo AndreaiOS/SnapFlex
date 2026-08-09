@@ -28,6 +28,10 @@ final class FakeCameraDevice: CameraDeviceProtocol {
     /// When set, returned as a `.processedHEIF` resource for every capture instead of
     /// `captureResult` — used by night-stack tests to feed real decodable HEIF fixtures.
     var stubbedCaptureData: Data?
+    /// When set (and non-empty), takes priority over `stubbedCaptureData`: cycles through
+    /// these by capture index (wrapping), so night-stack averaging tests can feed varying
+    /// per-frame data and actually distinguish "averaged" from "passed through last frame".
+    var stubbedCaptureDataSequence: [Data]?
     var captureCallCount = 0
     /// 0-based capture index at which to simulate a resource-less failure (empty resources),
     /// exercising night-stack's mid-sequence abort path. nil = never fail.
@@ -54,7 +58,10 @@ final class FakeCameraDevice: CameraDeviceProtocol {
             completion([])
             return
         }
-        if let stubbedCaptureData {
+        if let sequence = stubbedCaptureDataSequence, !sequence.isEmpty {
+            let data = sequence[index % sequence.count]
+            completion([CaptureResource(kind: .processedHEIF, data: data, frameIndex: index)])
+        } else if let stubbedCaptureData {
             completion([CaptureResource(kind: .processedHEIF, data: stubbedCaptureData, frameIndex: index)])
         } else {
             completion(captureResult)
