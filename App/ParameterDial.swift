@@ -17,40 +17,54 @@ struct ParameterDial: View {
     private static let decayFriction: Double = 0.93            // per-step multiplier
     private static let maxDecayIterations = 240                 // ~4s safety cap
 
+    // MARK: - Visual layout (tick ruler)
+
+    private static let tickSpacing: CGFloat = 8
+    private static let tickStripHeight: CGFloat = 26
+    private static let needleWidth: CGFloat = 2
+    private static let needleHeight: CGFloat = 32
+    private static let needleOverhang: CGFloat = (needleHeight - tickStripHeight) / 2
+    private static let labelHeight: CGFloat = 12
+    private static let labelGap: CGFloat = 16
+    private static let needleTopOffset: CGFloat = labelHeight + labelGap
+    private static let stripTopOffset: CGFloat = needleTopOffset + needleOverhang
+    private static let dialHeight: CGFloat = needleTopOffset + needleHeight
+
     var body: some View {
-        VStack(spacing: 6) {
-            Text(currentLabel)
-                .font(Theme.valueFont(15))
-                .foregroundStyle(Theme.accent)
-            GeometryReader { geo in
-                dialTrack
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture()
-                            .onChanged { drag in
-                                decayTask?.cancel()
-                                decayTask = nil
-                                if dragStartNormalized == nil {
-                                    dragStartNormalized = currentNormalized
-                                    lastDetentIndex = detentPlan.map {
-                                        nearestDetentIndex(currentNormalized, in: $0)
-                                    }
-                                }
-                                let delta = drag.translation.width / geo.size.width
-                                let newNormalized = (dragStartNormalized! + delta).clamped01
-                                apply(normalized: newNormalized)
-                                registerDetentCrossing(at: newNormalized)
-                            }
-                            .onEnded { drag in
-                                dragStartNormalized = nil
-                                let width = max(Double(geo.size.width), 1)
-                                let normalizedVelocity = Double(drag.velocity.width) / width
-                                startDecay(initialVelocity: normalizedVelocity)
-                            }
-                    )
+        GeometryReader { geo in
+            ZStack(alignment: .top) {
+                tickStrip(width: geo.size.width)
+                    .offset(y: Self.stripTopOffset)
+                needle
+                    .offset(y: Self.needleTopOffset)
+                valueLabel
             }
-            .frame(height: 28)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture()
+                    .onChanged { drag in
+                        decayTask?.cancel()
+                        decayTask = nil
+                        if dragStartNormalized == nil {
+                            dragStartNormalized = currentNormalized
+                            lastDetentIndex = detentPlan.map {
+                                nearestDetentIndex(currentNormalized, in: $0)
+                            }
+                        }
+                        let delta = drag.translation.width / geo.size.width
+                        let newNormalized = (dragStartNormalized! + delta).clamped01
+                        apply(normalized: newNormalized)
+                        registerDetentCrossing(at: newNormalized)
+                    }
+                    .onEnded { drag in
+                        dragStartNormalized = nil
+                        let width = max(Double(geo.size.width), 1)
+                        let normalizedVelocity = Double(drag.velocity.width) / width
+                        startDecay(initialVelocity: normalizedVelocity)
+                    }
+            )
         }
+        .frame(height: Self.dialHeight)
         .padding(.vertical, 6)
         .frame(maxWidth: .infinity)
         .background(Theme.chrome)
@@ -66,17 +80,56 @@ struct ParameterDial: View {
         }
     }
 
-    private var dialTrack: some View {
-        ZStack {
-            HStack(spacing: 5) {
-                ForEach(0..<41, id: \.self) { index in
-                    Rectangle()
-                        .fill(index == 20 ? Theme.accent : Theme.inactiveText.opacity(0.5))
-                        .frame(width: 1.5, height: index % 5 == 0 ? 16 : 9)
-                }
+    private var valueLabel: some View {
+        Text(currentLabel)
+            .font(Theme.valueFont(9))
+            .foregroundStyle(Theme.accent)
+            .contentTransition(.numericText())
+            .animation(Theme.motion(Theme.springStandard), value: currentLabel)
+            .frame(height: Self.labelHeight)
+    }
+
+    private var needle: some View {
+        Rectangle()
+            .fill(Theme.accent)
+            .frame(width: Self.needleWidth, height: Self.needleHeight)
+            .shadow(color: Theme.accent.opacity(0.8), radius: 8)
+    }
+
+    /// Scrolling tick strip: drawn across 3x the visible width so the ruler
+    /// never runs out of ticks near the edges, then clipped back to the
+    /// visible width and edge-faded. Offset is a pure function of the
+    /// gesture engine's existing `currentNormalized` — no second state.
+    private func tickStrip(width: CGFloat) -> some View {
+        let contentWidth = width * 3
+        let stripWidth = width * 2
+        let offsetX = -(currentNormalized - 0.5) * stripWidth
+        return Canvas { context, size in
+            var x: CGFloat = 0
+            while x <= size.width {
+                let tick = Path(CGRect(x: x, y: 0, width: 1, height: size.height))
+                context.fill(tick, with: .color(.white.opacity(0.28)))
+                x += Self.tickSpacing
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(width: contentWidth, height: Self.tickStripHeight)
+        .offset(x: offsetX)
+        .frame(width: width, height: Self.tickStripHeight)
+        .clipped()
+        .mask { edgeFadeMask }
+    }
+
+    private var edgeFadeMask: some View {
+        LinearGradient(
+            stops: [
+                .init(color: .clear, location: 0),
+                .init(color: .white, location: 0.18),
+                .init(color: .white, location: 0.82),
+                .init(color: .clear, location: 1)
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
     }
 
     // MARK: - Value mapping (log for ISO/shutter, linear otherwise)
