@@ -66,7 +66,7 @@ struct ViewfinderScreen: View {
 
     private var chromeHidden: Bool { chrome.state == .minimal }
 
-    private var showLoupe: Bool { selected == .focus && engine.values.focusPosition != nil }
+    private var showLoupe: Bool { selected == .focus && engine.values.focusPosition != nil && !isLongExposing }
 
     private var loupeCrosshair: some View {
         ZStack {
