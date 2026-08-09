@@ -72,4 +72,27 @@ final class FakeWatchSession: WatchSessionProtocol {
         remote.pushThumbnail(Data([0xFF]))
         #expect(fake.sent.isEmpty)
     }
+
+    @Test func liveReturnsSameInstanceOnRepeatedCalls() {
+        let first = WatchRemote.live()
+        let second = WatchRemote.live()
+        #expect(first === second)
+    }
+
+    @Test func reachabilityRegainedResendsLastPublishedStatus() async {
+        let fake = FakeWatchSession()
+        fake.isReachable = false
+        let remote = WatchRemote(session: fake)
+        let status = WatchStatus(line: "NIGHT 3/8", canCapture: false)
+        remote.publishStatus(status)
+        #expect(fake.sent.isEmpty)
+
+        fake.isReachable = true
+        remote.sessionReachabilityDidChange(WCSession.default)
+        try? await Task.sleep(for: .milliseconds(50))
+
+        #expect(fake.sent.count == 1)
+        let data = fake.sent.first?[WatchMessageKey.status] as? Data
+        #expect(data.flatMap(WatchStatus.decode) == status)
+    }
 }

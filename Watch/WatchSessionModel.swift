@@ -27,6 +27,7 @@ final class WatchSessionModel: NSObject, ObservableObject, WCSessionDelegate {
             return
         }
         session.sendMessage([WatchMessageKey.capture: true], replyHandler: nil, errorHandler: nil)
+        WKInterfaceDevice.current().play(.click)
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {

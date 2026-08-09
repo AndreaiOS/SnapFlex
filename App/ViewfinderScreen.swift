@@ -320,6 +320,11 @@ struct ViewfinderScreen: View {
                     withAnimation(Theme.motion(Theme.springStandard)) {
                         chrome.tick(now: Date().timeIntervalSinceReferenceDate)
                     }
+                    // Rides the existing 500ms tick instead of a dedicated
+                    // .onChange, so the watch sees a live-enough LONG
+                    // countdown without adding to the type-checker load on
+                    // this view's already-large modifier chain.
+                    if isLongExposing { publishWatchStatus() }
                 }
             }
         }
@@ -814,7 +819,14 @@ struct ViewfinderScreen: View {
         let maxDimension: CGFloat = 200
         let scale = min(1, maxDimension / max(image.size.width, image.size.height))
         let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
-        let resized = UIGraphicsImageRenderer(size: size).image { _ in
+        // Scale 1 (points == pixels): without this, UIGraphicsImageRenderer
+        // renders at the screen's native scale (2x/3x), producing a JPEG
+        // several times larger than intended and risking WCSession's
+        // sendMessage payload cap (errorHandler is nil, so an oversized send
+        // just silently vanishes).
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let resized = UIGraphicsImageRenderer(size: size, format: format).image { _ in
             image.draw(in: CGRect(origin: .zero, size: size))
         }
         if let jpeg = resized.jpegData(compressionQuality: 0.7) {

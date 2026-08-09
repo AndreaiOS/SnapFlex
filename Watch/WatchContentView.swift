@@ -1,5 +1,4 @@
 import SwiftUI
-import WatchKit
 
 struct WatchContentView: View {
     @StateObject private var session = WatchSessionModel()
@@ -14,7 +13,6 @@ struct WatchContentView: View {
 
             Button {
                 session.sendCapture()
-                WKInterfaceDevice.current().play(.click)
             } label: {
                 Circle()
                     .fill(Color.white)
