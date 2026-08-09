@@ -27,13 +27,14 @@ import Testing
     }
 
     @Test func blockedPinsFull() {
+        let idle = ChromeVisibility.idleSeconds
         var chrome = ChromeVisibility()
         chrome.interaction(at: 0)
         chrome.blocked = true
-        chrome.tick(now: 10)
+        chrome.tick(now: idle + 6)
         #expect(chrome.state == .full)
         chrome.blocked = false
-        chrome.tick(now: 10.1)   // idle window already elapsed
+        chrome.tick(now: idle + 6.1)   // idle window already elapsed
         #expect(chrome.state == .minimal)
     }
 
