@@ -13,6 +13,7 @@
 		17BEE6B2CCF25EECE6441AD4 /* ParameterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */; };
 		1D442E68CC194E7EDBE11142 /* LoupeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBD3A7AE8BA5F49D2C00106 /* LoupeView.swift */; };
 		1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */; };
+		1E7E7183C18272E6DD31FEC6 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82A9BF84DD89BC90A31F418 /* WatchContentView.swift */; };
 		2BB3C5740565D88F9706691B /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8716C7CF148E75E484EBD469 /* WaveformView.swift */; };
 		37E096BE9B489D708BDCBB4B /* SnapFlexCore in Frameworks */ = {isa = PBXBuildFile; productRef = 419FD1EAB2B112024220D6A8 /* SnapFlexCore */; };
 		38BA7C0DB8C77C4F9F82408C /* TopBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8170FBCBCE94A76D4EE06E7C /* TopBar.swift */; };
@@ -22,6 +23,7 @@
 		4991237717EB8B060F0121BE /* PhotoCaptureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */; };
 		4B6CC2E95068B4C7FAE487E4 /* LongExposureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00957AB69B137CAEF89B5036 /* LongExposureController.swift */; };
 		4D7F6CAD762D6D11BC0AD5BC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 32CA4EF3B4BF9DA85E164C13 /* Shaders.metal */; };
+		58B3FD5DE58E2F4F7050C822 /* SnapFlexWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = EFF61F36897130657FFF5D36 /* SnapFlexWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		594A68547B204F84404CEECA /* CameraEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5818B5D6919CFEDAA72E56 /* CameraEngineTests.swift */; };
 		5DF57BC171CB5A74E46CF3CE /* ParameterDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC948942CC36FA4AB62B09F3 /* ParameterDial.swift */; };
 		5F14AA211C298A270AC0ED88 /* OrientationModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0F682143B9DB436AF6D439 /* OrientationModelTests.swift */; };
@@ -29,6 +31,7 @@
 		623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */; };
 		65015462886289F1C00BD38C /* ShaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19500F32976684BCFADBA6C /* ShaderTests.swift */; };
 		67E60655976994AE2C0E54DC /* FakeCameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0824392C6EA0B27632D903BC /* FakeCameraDevice.swift */; };
+		7428CE0FBE7C3AD59930B44C /* SnapFlexCore in Frameworks */ = {isa = PBXBuildFile; productRef = DE52B5AD88928D9A1B1E9662 /* SnapFlexCore */; };
 		87DDBA41442BF83685A496C6 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5563AF0DF2EA31A94A8586D7 /* Haptics.swift */; };
 		8F7F70D9BB345365F95B36D2 /* CameraDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537E1319B1EEC5386E46AF9B /* CameraDevice.swift */; };
 		9A7B9845893A8AD73F6F45B1 /* PermissionGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A175F8825986D9B794759E53 /* PermissionGate.swift */; };
@@ -46,12 +49,20 @@
 		E2373E9C1CAC9A8D74EC3F5C /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C3AFC05BB91ED93F7640B /* PreviewView.swift */; };
 		E4705DE7239E225FA24A05EF /* LongAccumulatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */; };
 		EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */; };
+		EEBEEB2B5D3BD1CF4FA24E75 /* SnapFlexWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83B9F6863575B7D1D74CBD1 /* SnapFlexWatchApp.swift */; };
 		F15A41226521D1EE15BE509D /* ViewfinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1E3D848259F550104B95F3 /* ViewfinderScreen.swift */; };
 		F2B5FC076758871D27E4D32B /* LongExposureHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB27654374FCFD6F00971A2B /* LongExposureHUD.swift */; };
 		F76A868A2066FB9E9A8C2F42 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C025B67D84EDEB54171BE9F /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		D2EFCD48DC6F4335D5CA294D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FE46B3036EDC10A0738541A8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84E27A6694D923DEDEF051C1;
+			remoteInfo = SnapFlexWatch;
+		};
 		DA66EDBC68EC6B53CE5B2631 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FE46B3036EDC10A0738541A8 /* Project object */;
@@ -60,6 +71,20 @@
 			remoteInfo = SnapFlex;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D6EEED4EE6D5D0EEE50F399A /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				58B3FD5DE58E2F4F7050C822 /* SnapFlexWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		00957AB69B137CAEF89B5036 /* LongExposureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongExposureController.swift; sourceTree = "<group>"; };
@@ -94,13 +119,16 @@
 		B07A7E20103C5B51ABA4DB02 /* NightStacker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightStacker.swift; sourceTree = "<group>"; };
 		B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongAccumulatorTests.swift; sourceTree = "<group>"; };
 		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
+		B83B9F6863575B7D1D74CBD1 /* SnapFlexWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapFlexWatchApp.swift; sourceTree = "<group>"; };
 		BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridLevelOverlay.swift; sourceTree = "<group>"; };
 		BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterBar.swift; sourceTree = "<group>"; };
 		C3D28EE8B7221C69F2B40F39 /* SnapFlexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapFlexApp.swift; sourceTree = "<group>"; };
 		CAAD47BC23E172EC9ECB96C0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		CC948942CC36FA4AB62B09F3 /* ParameterDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterDial.swift; sourceTree = "<group>"; };
 		D77DC5D4CA6E5D96E59F321F /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
+		D82A9BF84DD89BC90A31F418 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
 		E19500F32976684BCFADBA6C /* ShaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderTests.swift; sourceTree = "<group>"; };
+		EFF61F36897130657FFF5D36 /* SnapFlexWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnapFlexWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealCameraDevice.swift; sourceTree = "<group>"; };
 		F56FBE2514C4CDD6C61F1856 /* DeviceSettingsReproTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSettingsReproTests.swift; sourceTree = "<group>"; };
 		FAD20D655ACD724D43494C28 /* NightStackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightStackerTests.swift; sourceTree = "<group>"; };
@@ -114,6 +142,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				37E096BE9B489D708BDCBB4B /* SnapFlexCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F2A9A408291796AA1C1A2947 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7428CE0FBE7C3AD59930B44C /* SnapFlexCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +177,15 @@
 			path = Engine;
 			sourceTree = "<group>";
 		};
+		5343F108DC5CC4DB635CE877 /* Watch */ = {
+			isa = PBXGroup;
+			children = (
+				B83B9F6863575B7D1D74CBD1 /* SnapFlexWatchApp.swift */,
+				D82A9BF84DD89BC90A31F418 /* WatchContentView.swift */,
+			);
+			path = Watch;
+			sourceTree = "<group>";
+		};
 		586B284DD3C1FFF648BC8BA2 /* Overlay */ = {
 			isa = PBXGroup;
 			children = (
@@ -160,6 +205,7 @@
 				586B284DD3C1FFF648BC8BA2 /* Overlay */,
 				05E57CD187E0B47B143ECE38 /* Packages */,
 				F84FCA7F61494136B70ABD85 /* Tests */,
+				5343F108DC5CC4DB635CE877 /* Watch */,
 				915B04773E81B29BC49BB81F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -179,6 +225,7 @@
 			children = (
 				0FB1CEC41DCC5D1E2E90B04B /* SnapFlex.app */,
 				908BE8493E24C5554CA2DD41 /* SnapFlexTests.xctest */,
+				EFF61F36897130657FFF5D36 /* SnapFlexWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -229,6 +276,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		84E27A6694D923DEDEF051C1 /* SnapFlexWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 44BEE238B77580F7EFA92F03 /* Build configuration list for PBXNativeTarget "SnapFlexWatch" */;
+			buildPhases = (
+				62AD985FA067334C49F783F3 /* Sources */,
+				F2A9A408291796AA1C1A2947 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SnapFlexWatch;
+			packageProductDependencies = (
+				DE52B5AD88928D9A1B1E9662 /* SnapFlexCore */,
+			);
+			productName = SnapFlexWatch;
+			productReference = EFF61F36897130657FFF5D36 /* SnapFlexWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 		BC7F70E6DDE9804F84A3DDB1 /* SnapFlex */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F468B23DABBB26EE51349C9C /* Build configuration list for PBXNativeTarget "SnapFlex" */;
@@ -236,10 +302,12 @@
 				5B0F64398D6467BBD9AE4B20 /* Sources */,
 				BBD95D86C487B47AA3CE7B84 /* Resources */,
 				CE385D1742ADD1B40B055F38 /* Frameworks */,
+				D6EEED4EE6D5D0EEE50F399A /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				ACED10DB9D874FAD2A0CB589 /* PBXTargetDependency */,
 			);
 			name = SnapFlex;
 			packageProductDependencies = (
@@ -276,6 +344,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					84E27A6694D923DEDEF051C1 = {
+						DevelopmentTeam = RA4VQQK3U6;
+					};
 					BC7F70E6DDE9804F84A3DDB1 = {
 						DevelopmentTeam = RA4VQQK3U6;
 					};
@@ -300,6 +371,7 @@
 			targets = (
 				BC7F70E6DDE9804F84A3DDB1 /* SnapFlex */,
 				DE18115AE5299F5FDDBB2ABA /* SnapFlexTests */,
+				84E27A6694D923DEDEF051C1 /* SnapFlexWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -352,6 +424,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		62AD985FA067334C49F783F3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EEBEEB2B5D3BD1CF4FA24E75 /* SnapFlexWatchApp.swift in Sources */,
+				1E7E7183C18272E6DD31FEC6 /* WatchContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6A456C9242DA5652CB4AB2C3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -378,9 +459,31 @@
 			target = BC7F70E6DDE9804F84A3DDB1 /* SnapFlex */;
 			targetProxy = DA66EDBC68EC6B53CE5B2631 /* PBXContainerItemProxy */;
 		};
+		ACED10DB9D874FAD2A0CB589 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84E27A6694D923DEDEF051C1 /* SnapFlexWatch */;
+			targetProxy = D2EFCD48DC6F4335D5CA294D /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0BAA6883AAC695533ABB3540 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RA4VQQK3U6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = co.SnapFlex;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.SnapFlex.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
 		27AB33A9A13C6DF884E9506B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -479,12 +582,28 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
+		};
+		8AAE6B8F102B3D4DCE9007F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RA4VQQK3U6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = co.SnapFlex;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.SnapFlex.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
 		};
 		B09553540A95B2EF33610BDC /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -577,7 +696,6 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -587,6 +705,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		44BEE238B77580F7EFA92F03 /* Build configuration list for PBXNativeTarget "SnapFlexWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0BAA6883AAC695533ABB3540 /* Debug */,
+				8AAE6B8F102B3D4DCE9007F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		6405772098952933B2F03A05 /* Build configuration list for PBXNativeTarget "SnapFlexTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -625,6 +752,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		419FD1EAB2B112024220D6A8 /* SnapFlexCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SnapFlexCore;
+		};
+		DE52B5AD88928D9A1B1E9662 /* SnapFlexCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SnapFlexCore;
 		};
