@@ -271,4 +271,24 @@ import SnapFlexCore
         try await Task.sleep(for: .milliseconds(500))
         #expect(completed)
     }
+
+    @Test func endLongExposureNoOpsWhileNightStackRunning() async throws {
+        let (engine, device) = makeEngine()
+        let rgba = Self.solidRGBA(width: 2, height: 2, value: 128)
+        let encoded = try #require(NightStacker.encodeHEIF(rgba: rgba, width: 2, height: 2))
+        device.stubbedCaptureData = encoded
+
+        var completed = false
+        engine.captureNightStack(onProgress: { _, _ in }) { _ in completed = true }
+        #expect(device.lockCalls == 1)   // the night stack's own lock
+
+        // A LONG session torn down mid-stack must not unlock AE out from under
+        // the stack's remaining frames.
+        engine.endLongExposure()
+        #expect(device.unlockCalls == 0)
+
+        try await Task.sleep(for: .milliseconds(500))
+        #expect(completed)
+        #expect(device.unlockCalls == 1)   // the stack's own completion still restores AE
+    }
 }

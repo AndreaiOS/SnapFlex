@@ -157,8 +157,8 @@ struct ViewfinderScreen: View {
                            onApplyRecipe: apply,
                            onSaveRecipe: beginSaveRecipe,
                            onDeleteRecipe: deleteRecipe)
-                        .disabled(isLongExposing)
-                        .opacity(isLongExposing ? 0.4 : 1)
+                        .disabled(isLongExposing || captureInFlight)
+                        .opacity(isLongExposing || captureInFlight ? 0.4 : 1)
                     if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
                         HStack {
                             Spacer()
@@ -648,6 +648,7 @@ struct ViewfinderScreen: View {
         guard engine.status != .interrupted else { return }
         chromeInteraction()
         if let longController, engine.longMode != .off || longController.isExposing {
+            guard !captureInFlight else { return }
             countdownTask?.cancel()
             countdownTask = nil
             countdown = nil
@@ -758,14 +759,16 @@ struct ViewfinderScreen: View {
         UIApplication.shared.isIdleTimerDisabled = true
         let backgroundGuard = LongExposureBackgroundGuard()
         backgroundGuard.begin(name: "night-stack-finalize")
+        nightProgress = (0, NightStack.frameCount)
+        Haptics.medium()
         engine.captureNightStack(onProgress: { current, total in
             nightProgress = (current, total)
         }) { data in
             captureInFlight = false
             nightProgress = nil
             UIApplication.shared.isIdleTimerDisabled = false
-            backgroundGuard.end()
             guard let data else {
+                backgroundGuard.end()
                 showCaptureFailed()
                 return
             }
@@ -778,6 +781,7 @@ struct ViewfinderScreen: View {
             Task {
                 await store.store([CaptureResource(kind: .processedHEIF, data: data)])
                 refreshSaveState()
+                backgroundGuard.end()
             }
             Haptics.success()
         }

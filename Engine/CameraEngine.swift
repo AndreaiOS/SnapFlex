@@ -222,7 +222,13 @@ final class CameraEngine {
         lockAEIfAuto()
     }
 
-    func endLongExposure() { restoreAEAfterLock() }
+    /// No-ops while a night stack is in flight — mirrors `prepareLongExposure`'s guard so a
+    /// LONG session torn down mid-stack can't unlock AE out from under the stack's remaining
+    /// frames; the stack's own `finishNightStack` is responsible for restoring AE.
+    func endLongExposure() {
+        guard !nightStackRunning else { return }
+        restoreAEAfterLock()
+    }
 
     /// Shared by `prepareLongExposure` and `captureNightStack`: locks AE when either ISO or
     /// shutter is auto (i.e. the session isn't fully manual), remembering to unlock it later.
