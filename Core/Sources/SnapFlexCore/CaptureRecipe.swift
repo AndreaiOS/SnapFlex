@@ -8,7 +8,7 @@ public struct DeviceCapabilities: Equatable, Sendable {
     }
 }
 
-public enum RAWMode: String, CaseIterable, Sendable {
+public enum RAWMode: String, CaseIterable, Sendable, Codable {
     case off = "HEIF"
     case proRAW = "ProRAW"
     case bayer = "RAW"

@@ -1,4 +1,4 @@
-public enum ProcessingLevel: String, CaseIterable, Sendable {
+public enum ProcessingLevel: String, CaseIterable, Sendable, Codable {
     case zero = "0AI"
     case standard = "STD"
     case max = "MAX"
