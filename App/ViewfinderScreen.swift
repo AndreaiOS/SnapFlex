@@ -398,6 +398,15 @@ struct ViewfinderScreen: View {
                 if let longController, longController.isExposing {
                     LongExposureShutterRing(controller: longController)
                 }
+                evArc
+                    .opacity(chromeHidden ? 0 : 1)
+                    .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
+                if engine.values.evBias != 0 {
+                    evLabel
+                        .opacity(chromeHidden ? 0 : 1)
+                        .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
+                        .transition(.opacity)
+                }
                 Button {
                     takePhoto()
                 } label: {
@@ -462,6 +471,35 @@ struct ViewfinderScreen: View {
             .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
         }
         .padding(.horizontal, 20)
+    }
+
+    /// -1...1: sign gives sweep direction (+clockwise from 12 o'clock, -mirrored),
+    /// magnitude is EV bias as a fraction of the device's upper bias range.
+    private var evFraction: Double {
+        let bias = Double(engine.values.evBias)
+        let upperBound = Double(max(engine.ranges.evBias.upperBound, 1))
+        let fraction = bias / upperBound
+        return min(max(fraction, -1), 1)
+    }
+
+    private var evArc: some View {
+        let fraction = evFraction
+        let trimEnd = CGFloat(abs(fraction) / 2)
+        return Circle()
+            .trim(from: 0, to: trimEnd)
+            .stroke(Theme.accent, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .frame(width: 80, height: 80)
+            .rotationEffect(.degrees(-90))
+            .scaleEffect(x: fraction < 0 ? -1 : 1)
+            .animation(Theme.motion(Theme.springStandard), value: engine.values.evBias)
+    }
+
+    private var evLabel: some View {
+        Text(String(format: "EV %+.1f", engine.values.evBias))
+            .font(Theme.valueFont(7.5))
+            .foregroundStyle(Theme.accent)
+            .tracking(0.9)
+            .offset(y: -52)
     }
 
     func takePhoto() {

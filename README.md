@@ -56,3 +56,9 @@ not work in the simulator).
 - [ ] Reduce Motion ON: crossfades instead of springs, auto-hide still works
 - [ ] Dial momentum feels right on hardware (friction/stop threshold tuning)
 - [ ] Selection capsule and thumbnail pop behave correctly under device rotation and with Reduce Motion ON
+- [ ] Segmented rail legible over bright scenes; active cells green with underline
+- [ ] Statusline shows pipeline summary and battery; assist menu opens from top-right
+- [ ] Ruler ticks scroll under the fixed needle and settle on detents
+- [ ] EV arc sweeps clockwise for +, mirrored for −; label appears only when EV ≠ 0
+- [ ] Aspect picker in the assist menu renders usably (not a buried submenu)
+- [ ] Ruler value label has no vertical clipping at 9pt
