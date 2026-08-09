@@ -63,3 +63,4 @@ not work in the simulator).
 - [ ] Aspect picker in the assist menu renders usably (not a buried submenu)
 - [ ] Ruler value label has no vertical clipping at 9pt
 - [ ] Waveform tracks scene luminance live; no frame drops with all overlays on
+- [ ] Loupe appears while focusing manually (dial open + MF); magnified center crop is sharp and live

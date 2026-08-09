@@ -10,6 +10,7 @@
 		09B41C74FC91F2399BA9B1DE /* LongControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B1E47887DC0A63934CF5AA /* LongControllerTests.swift */; };
 		1139237AD387A6B02E90B7F0 /* PhotoCaptureCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */; };
 		17BEE6B2CCF25EECE6441AD4 /* ParameterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */; };
+		1D442E68CC194E7EDBE11142 /* LoupeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBD3A7AE8BA5F49D2C00106 /* LoupeView.swift */; };
 		1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB66FB07E346FC81B9F076E /* GridLevelOverlay.swift */; };
 		2BB3C5740565D88F9706691B /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8716C7CF148E75E484EBD469 /* WaveformView.swift */; };
 		37E096BE9B489D708BDCBB4B /* SnapFlexCore in Frameworks */ = {isa = PBXBuildFile; productRef = 419FD1EAB2B112024220D6A8 /* SnapFlexCore */; };
@@ -86,6 +87,7 @@
 		96B1E47887DC0A63934CF5AA /* LongControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongControllerTests.swift; sourceTree = "<group>"; };
 		9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = LongExposureShaders.metal; sourceTree = "<group>"; };
 		9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
+		9CBD3A7AE8BA5F49D2C00106 /* LoupeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoupeView.swift; sourceTree = "<group>"; };
 		A175F8825986D9B794759E53 /* PermissionGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionGate.swift; sourceTree = "<group>"; };
 		B2C844FE9A31DC07D141BE24 /* LongAccumulatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongAccumulatorTests.swift; sourceTree = "<group>"; };
 		B71A8479403947EF0CC4C9B3 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
@@ -202,6 +204,7 @@
 				3BCA3E2AAB0B49FAC8648A35 /* HistogramView.swift */,
 				FB27654374FCFD6F00971A2B /* LongExposureHUD.swift */,
 				19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */,
+				9CBD3A7AE8BA5F49D2C00106 /* LoupeView.swift */,
 				5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */,
 				621CEA0907AF3F1CFF716FE0 /* OverlayMetalView.swift */,
 				BED4FF7C83F47D73D69BB509 /* ParameterBar.swift */,
@@ -322,6 +325,7 @@
 				F2B5FC076758871D27E4D32B /* LongExposureHUD.swift in Sources */,
 				CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */,
 				DABA603F82293BE87F1A0236 /* LongPreviewMetalView.swift in Sources */,
+				1D442E68CC194E7EDBE11142 /* LoupeView.swift in Sources */,
 				EA5ED16D34E033E4C5B655EA /* OrientationModel.swift in Sources */,
 				BB7EBAB9D70F31CB470D8F64 /* OverlayFrameDriver.swift in Sources */,
 				623E59EC691D6BA04F1DF0B2 /* OverlayMetalView.swift in Sources */,

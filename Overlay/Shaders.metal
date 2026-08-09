@@ -114,6 +114,15 @@ fragment float4 waveformFragment(VertexOut in [[stage_in]],
     return float4(mix(ground, accent, alpha), 1.0);
 }
 
+fragment float4 loupeFragment(OverlayVertexOut in [[stage_in]],
+                              texture2d<float, access::read> loupe [[texture(0)]]) {
+    uint side = loupe.get_width();
+    uint2 coord = uint2(min(uint(in.uv.x * float(side)), side - 1),
+                        min(uint(in.uv.y * float(side)), side - 1));
+    float4 c = loupe.read(coord);
+    return float4(c.rgb, 1.0);
+}
+
 fragment float4 overlayFragment(OverlayVertexOut in [[stage_in]],
                                 texture2d<float, access::sample> mask [[texture(0)]]) {
     constexpr sampler s(mag_filter::linear, min_filter::linear);

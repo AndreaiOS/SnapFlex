@@ -66,6 +66,15 @@ struct ViewfinderScreen: View {
 
     private var chromeHidden: Bool { chrome.state == .minimal }
 
+    private var showLoupe: Bool { selected == .focus && engine.values.focusPosition != nil }
+
+    private var loupeCrosshair: some View {
+        ZStack {
+            Rectangle().fill(Theme.accent).frame(width: 8, height: 2)
+            Rectangle().fill(Theme.accent).frame(width: 2, height: 8)
+        }
+    }
+
     private func chromeInteraction() {
         withAnimation(Theme.motion(Theme.springBouncy)) {
             chrome.interaction(at: Date().timeIntervalSinceReferenceDate)
@@ -235,7 +244,20 @@ struct ViewfinderScreen: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .padding(.top, 44)
             }
+
+            if showLoupe, let driver {
+                LoupeView(driver: driver)
+                    .frame(width: 140, height: 140)
+                    .clipShape(Circle())
+                    .overlay(Circle().strokeBorder(Color.white.opacity(0.2), lineWidth: 1))
+                    .overlay(loupeCrosshair)
+                    .allowsHitTesting(false)
+                    .transition(.scale(scale: 0.9).combined(with: .opacity))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 120)
+            }
         }
+        .animation(Theme.motion(Theme.springBouncy), value: showLoupe)
         .statusBarHidden()
         .onAppear {
             loadSettings()
@@ -256,9 +278,13 @@ struct ViewfinderScreen: View {
             orientation.stop()
             chromeTask?.cancel()
             chromeTask = nil
+            engine.overlaySettings.loupeEnabled = false
         }
         .onChange(of: chromeBlocked) { _, blocked in
             chrome.blocked = blocked
+        }
+        .onChange(of: showLoupe) { _, on in
+            engine.overlaySettings.loupeEnabled = on
         }
         .onChange(of: engine.values) { _, _ in
             chromeInteractionThrottled()
