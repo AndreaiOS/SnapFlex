@@ -400,11 +400,18 @@ struct ViewfinderScreen: View {
                 }
                 evArc
                     .opacity(chromeHidden ? 0 : 1)
+                    .opacity(isLongExposing ? 0 : 1)
+                    .allowsHitTesting(false)
                     .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
+                    .animation(Theme.motion(Theme.springStandard), value: isLongExposing)
                 if engine.values.evBias != 0 {
                     evLabel
                         .opacity(chromeHidden ? 0 : 1)
+                        .opacity(isLongExposing ? 0 : 1)
+                        .allowsHitTesting(false)
                         .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
+                        .animation(Theme.motion(Theme.springStandard), value: isLongExposing)
+                        .animation(Theme.motion(Theme.springStandard), value: engine.values.evBias != 0)
                         .transition(.opacity)
                 }
                 Button {
@@ -500,6 +507,7 @@ struct ViewfinderScreen: View {
             .foregroundStyle(Theme.accent)
             .tracking(0.9)
             .offset(y: -52)
+            .rotatesWithDevice(orientation.uiAngle)
     }
 
     func takePhoto() {
