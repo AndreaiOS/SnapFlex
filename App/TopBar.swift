@@ -185,6 +185,7 @@ struct TopBar: View {
                 }
             }
             Toggle("Histogram", isOn: overlayBinding(\.histogramEnabled))
+            Toggle("Waveform", isOn: overlayBinding(\.waveformEnabled))
             Toggle("Focus Peaking", isOn: overlayBinding(\.peakingEnabled))
             Toggle("Zebra", isOn: overlayBinding(\.zebraEnabled))
             Toggle("Grid", isOn: $showGrid)

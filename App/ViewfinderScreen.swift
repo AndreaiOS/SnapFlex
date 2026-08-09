@@ -157,6 +157,28 @@ struct ViewfinderScreen: View {
                     LongExposureHUD(controller: longController)
                         .padding(.bottom, 4)
                 }
+                if engine.overlaySettings.waveformEnabled, let driver {
+                    WaveformView(driver: driver)
+                        .frame(width: 118, height: 52)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .overlay(
+                            ZStack(alignment: .topLeading) {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                                Text("LUMA")
+                                    .font(Theme.valueFont(6))
+                                    .tracking(1.2)
+                                    .foregroundStyle(Color.white.opacity(0.35))
+                                    .padding(4)
+                            }
+                        )
+                        .allowsHitTesting(false)
+                        .padding(.leading, 14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .opacity(chromeHidden ? 0 : 1)
+                        .scaleEffect(chromeHidden ? 0.96 : 1, anchor: .bottom)
+                        .animation(Theme.motion(chromeHidden ? Theme.springStandard : Theme.springBouncy), value: chromeHidden)
+                }
                 Group {
                     if let parameter = selected {
                         ParameterDial(engine: engine, parameter: parameter)

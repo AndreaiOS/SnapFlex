@@ -101,6 +101,19 @@ vertex OverlayVertexOut overlayVertex(uint vid [[vertex_id]]) {
     return out;
 }
 
+using VertexOut = OverlayVertexOut;
+
+fragment float4 waveformFragment(VertexOut in [[stage_in]],
+                                 texture2d<uint, access::read> waveform [[texture(0)]]) {
+    uint2 coord = uint2(in.uv.x * 128, in.uv.y * 64);
+    uint count = waveform.read(coord).r;
+    float knee = 8.0;
+    float alpha = min(1.0, float(count) / knee);
+    float3 accent = float3(0.29, 0.87, 0.50);
+    float3 ground = float3(0.03, 0.04, 0.035);
+    return float4(mix(ground, accent, alpha), 1.0);
+}
+
 fragment float4 overlayFragment(OverlayVertexOut in [[stage_in]],
                                 texture2d<float, access::sample> mask [[texture(0)]]) {
     constexpr sampler s(mag_filter::linear, min_filter::linear);

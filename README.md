@@ -62,3 +62,4 @@ not work in the simulator).
 - [ ] EV arc sweeps clockwise for +, mirrored for −; label appears only when EV ≠ 0
 - [ ] Aspect picker in the assist menu renders usably (not a buried submenu)
 - [ ] Ruler value label has no vertical clipping at 9pt
+- [ ] Waveform tracks scene luminance live; no frame drops with all overlays on
