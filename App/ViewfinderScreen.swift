@@ -55,6 +55,7 @@ struct ViewfinderScreen: View {
     @State private var pendingSaves = 0
     @State private var captureInFlight = false
     @State private var captureFailed = false
+    @State private var nightProgress: (Int, Int)?
     @State private var displayZoom: Double = 1
     @State private var recipeBook = RecipeBook(data: UserDefaults.standard.data(forKey: "recipes.book") ?? Data())
     @State private var showSaveRecipeAlert = false
@@ -65,6 +66,7 @@ struct ViewfinderScreen: View {
 
     private var chromeBlocked: Bool {
         selected != nil || isLongExposing || countdown != nil || engine.status == .interrupted
+            || nightProgress != nil
     }
 
     private var chromeHidden: Bool { chrome.state == .minimal }
@@ -234,6 +236,27 @@ struct ViewfinderScreen: View {
                     .transition(.opacity)
                     .animation(Theme.motion(Theme.springStandard), value: chromeHidden)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            }
+
+            if let nightProgress {
+                let progressText = "NIGHT \(nightProgress.0)/\(nightProgress.1)"
+                Text(progressText)
+                    .font(Theme.valueFont(11))
+                    .tracking(0.5)
+                    .foregroundStyle(Theme.accent)
+                    .contentTransition(.numericText())
+                    .animation(Theme.motion(Theme.springStandard), value: progressText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(Color.black.opacity(0.65)))
+                    .overlay(Capsule().strokeBorder(Theme.accent.opacity(0.5), lineWidth: 1))
+                    .rotatesWithDevice(orientation.uiAngle)
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 44)
             }
 
             if captureFailed {
@@ -641,7 +664,7 @@ struct ViewfinderScreen: View {
             countdown = nil
             return
         }
-        guard timerDuration > 0 else { performCapture(); return }
+        guard timerDuration > 0 else { routeCapture(); return }
         var timer = CaptureTimer(duration: timerDuration)
         timer.start()
         countdownTask = Task {
@@ -656,8 +679,17 @@ struct ViewfinderScreen: View {
             countdownTask = nil
             if timer.state == .fired {
                 chromeInteraction()
-                performCapture()
+                routeCapture()
             }
+        }
+    }
+
+    /// Routes a fired shutter to the NIGHT stack or a normal single capture.
+    private func routeCapture() {
+        if engine.nightEnabled {
+            performNightStack()
+        } else {
+            performCapture()
         }
     }
 
@@ -717,6 +749,37 @@ struct ViewfinderScreen: View {
                 await store.store(resources)
                 refreshSaveState()
             }
+        }
+    }
+
+    private func performNightStack() {
+        guard !captureInFlight else { return }
+        captureInFlight = true
+        UIApplication.shared.isIdleTimerDisabled = true
+        let backgroundGuard = LongExposureBackgroundGuard()
+        backgroundGuard.begin(name: "night-stack-finalize")
+        engine.captureNightStack(onProgress: { current, total in
+            nightProgress = (current, total)
+        }) { data in
+            captureInFlight = false
+            nightProgress = nil
+            UIApplication.shared.isIdleTimerDisabled = false
+            backgroundGuard.end()
+            guard let data else {
+                showCaptureFailed()
+                return
+            }
+            if let image = UIImage(data: data) {
+                withAnimation(Theme.motion(Theme.springBouncy)) {
+                    lastThumbnail = image
+                    thumbnailID += 1
+                }
+            }
+            Task {
+                await store.store([CaptureResource(kind: .processedHEIF, data: data)])
+                refreshSaveState()
+            }
+            Haptics.success()
         }
     }
 

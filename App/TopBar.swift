@@ -146,11 +146,21 @@ struct TopBar: View {
                      active: engine.bracketCount != nil) {
                 engine.bracketCount = engine.bracketCount == nil ? 3
                     : engine.bracketCount == 3 ? 5 : nil
+                if engine.bracketCount != nil { engine.nightEnabled = false }
             }
             if longAvailable {
                 railCell(label: "LONG", value: RailLabels.long(engine.longMode),
                          active: engine.longMode != .off) {
                     engine.longMode = engine.longMode.next
+                    if engine.longMode != .off { engine.nightEnabled = false }
+                }
+                railCell(label: "NIGHT", value: engine.nightEnabled ? "×8" : "—",
+                         active: engine.nightEnabled) {
+                    engine.nightEnabled = !engine.nightEnabled
+                    if engine.nightEnabled {
+                        engine.longMode = .off
+                        engine.bracketCount = nil
+                    }
                 }
                 if engine.longMode != .off {
                     railCell(label: "BLEND", value: engine.longBlend.rawValue, active: true) {

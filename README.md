@@ -41,6 +41,7 @@ not work in the simulator).
 - [ ] BULB: starts on tap, stops+saves on second tap; auto-stops at 5 min
 - [ ] Preset tap-to-cancel discards (nothing saved to Photos)
 - [ ] Backgrounding mid-exposure saves the partial result (if ≥ 1s)
+- [ ] NIGHT ×8 on a tripod: single clean HEIF saved, visibly less noisy than one 0AI frame; abort mid-stack leaves no partial asset
 - [ ] Shake warning appears handheld, absent on tripod
 - [ ] AE stays locked during the exposure (no brightness pumping in preview)
 - [ ] PROC 0AI vs MAX on a detailed scene shows visibly different processing
