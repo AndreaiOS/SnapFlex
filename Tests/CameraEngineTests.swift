@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import SnapFlexCore
 @testable import SnapFlex
@@ -137,5 +138,62 @@ import SnapFlexCore
         try await Task.sleep(for: .milliseconds(100))
         #expect(engine.values.iso == nil)
         engine.endLongFrames()
+    }
+
+    // MARK: - Night Stack
+
+    @Test func captureNightStackAveragesFramesAndRestoresAE() async throws {
+        let (engine, device) = makeEngine()
+        let width = 2, height = 2
+        let rgba = [UInt8](repeating: 128, count: width * height * 4)
+        let encoded = try #require(NightStacker.encodeHEIF(rgba: rgba, width: width, height: height))
+        device.stubbedCaptureData = encoded
+        engine.formatSelection = FormatSelection(raw: .proRAW, heifCompanion: true)
+        engine.processingLevel = .max
+
+        var progressCalls: [(Int, Int)] = []
+        var completed = false
+        var result: Data?
+        engine.captureNightStack(onProgress: { progressCalls.append(($0, $1)) }) { data in
+            result = data
+            completed = true
+        }
+        try await Task.sleep(for: .milliseconds(500))
+
+        #expect(completed)
+        let data = try #require(result)
+        let decoded = try #require(NightStacker.decodeRGBA8(data))
+        #expect(decoded.width == width)
+        #expect(decoded.height == height)
+        #expect(progressCalls.map(\.0) == Array(1...NightStack.frameCount))
+        #expect(progressCalls.allSatisfy { $0.1 == NightStack.frameCount })
+        #expect(device.capturedRecipes.count == NightStack.frameCount)
+        #expect(device.capturedRecipes.allSatisfy { $0.raw == RAWKind.none && $0.processing == .zero })
+        // Forced recipe must not mutate published UI state.
+        #expect(engine.formatSelection == FormatSelection(raw: .proRAW, heifCompanion: true))
+        #expect(engine.processingLevel == .max)
+        // AE was locked (device starts fully auto) then restored.
+        #expect(device.lockCalls == 1)
+        #expect(device.unlockCalls == 1)
+    }
+
+    @Test func captureNightStackAbortsOnEmptyResourcesMidStack() async throws {
+        let (engine, device) = makeEngine()
+        let rgba = [UInt8](repeating: 64, count: 2 * 2 * 4)
+        let encoded = try #require(NightStacker.encodeHEIF(rgba: rgba, width: 2, height: 2))
+        device.stubbedCaptureData = encoded
+        device.failCaptureAtIndex = 3
+
+        var completed = false
+        var result: Data?
+        engine.captureNightStack(onProgress: { _, _ in }) { data in
+            result = data
+            completed = true
+        }
+        try await Task.sleep(for: .milliseconds(500))
+
+        #expect(completed)
+        #expect(result == nil)
+        #expect(device.unlockCalls == 1)   // AE still restored on abort
     }
 }

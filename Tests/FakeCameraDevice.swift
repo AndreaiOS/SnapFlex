@@ -25,6 +25,13 @@ final class FakeCameraDevice: CameraDeviceProtocol {
     var unlockCalls = 0
     var capturedRecipes: [CaptureRecipe] = []
     var captureResult: [CaptureResource] = [CaptureResource(kind: .processedHEIF, data: Data([1]))]
+    /// When set, returned as a `.processedHEIF` resource for every capture instead of
+    /// `captureResult` — used by night-stack tests to feed real decodable HEIF fixtures.
+    var stubbedCaptureData: Data?
+    var captureCallCount = 0
+    /// 0-based capture index at which to simulate a resource-less failure (empty resources),
+    /// exercising night-stack's mid-sequence abort path. nil = never fail.
+    var failCaptureAtIndex: Int?
 
     func start() { started = true; onStatusChange?(.running) }
     func stop() { started = false; onStatusChange?(.notRunning) }
@@ -41,6 +48,16 @@ final class FakeCameraDevice: CameraDeviceProtocol {
     func capture(recipe: CaptureRecipe, flashOn: Bool,
                  completion: @escaping ([CaptureResource]) -> Void) {
         capturedRecipes.append(recipe)
-        completion(captureResult)
+        let index = captureCallCount
+        captureCallCount += 1
+        if index == failCaptureAtIndex {
+            completion([])
+            return
+        }
+        if let stubbedCaptureData {
+            completion([CaptureResource(kind: .processedHEIF, data: stubbedCaptureData, frameIndex: index)])
+        } else {
+            completion(captureResult)
+        }
     }
 }

@@ -34,6 +34,7 @@ final class CameraEngine {
     }
     var longMode: LongMode = .off
     var longBlend: LongBlend = .nd
+    var nightEnabled = false
 
     /// Set by the app wiring (Task 5); invoked on videoQueue with each camera frame
     /// while a long-exposure session is running.
@@ -185,11 +186,20 @@ final class CameraEngine {
                                         capabilities: capabilities,
                                         bracketing: bracketing,
                                         processing: processingLevel)
-        device.capture(recipe: recipe, flashOn: flashOn) { [weak self] resources in
-            Task { @MainActor in
-                self?.lastCapture = resources
-                onResult(resources)
-            }
+        deviceCapture(recipe: recipe, flashOn: flashOn) { [weak self] resources in
+            self?.lastCapture = resources
+            onResult(resources)
+        }
+    }
+
+    /// Sends `recipe` straight to the device, bypassing published UI state (formatSelection,
+    /// processingLevel, bracketCount) entirely — used by `capture(onResult:)` and by
+    /// `captureNightStack`, which forces its own recipe without touching those published
+    /// values. Does not update `lastCapture`; callers that want that publish it themselves.
+    private func deviceCapture(recipe: CaptureRecipe, flashOn: Bool,
+                               onResult: @escaping ([CaptureResource]) -> Void) {
+        device.capture(recipe: recipe, flashOn: flashOn) { resources in
+            Task { @MainActor in onResult(resources) }
         }
     }
 
@@ -202,14 +212,22 @@ final class CameraEngine {
 
     // MARK: - Long Exposure
 
-    func prepareLongExposure() {
+    func prepareLongExposure() { lockAEIfAuto() }
+
+    func endLongExposure() { restoreAEAfterLock() }
+
+    /// Shared by `prepareLongExposure` and `captureNightStack`: locks AE only when the
+    /// session is fully automatic (no manual ISO/shutter), remembering to unlock it later.
+    private func lockAEIfAuto() {
         if values.iso == nil || values.shutterSeconds == nil {
             device.lockAutoExposure()
             didLockAE = true
         }
     }
 
-    func endLongExposure() {
+    /// Shared by `endLongExposure` and `captureNightStack`: undoes `lockAEIfAuto` and
+    /// re-applies any manual exposure the lock overrode.
+    private func restoreAEAfterLock() {
         if didLockAE {
             device.unlockAutoExposure()
             didLockAE = false
@@ -217,6 +235,71 @@ final class CameraEngine {
         if values.iso != nil || values.shutterSeconds != nil {
             applyExposure()   // restore custom exposure the lock overrode
         }
+    }
+
+    // MARK: - Night Stack
+
+    /// Captures `NightStack.frameCount` frames sequentially with a forced NIGHT recipe
+    /// (no RAW, `.zero` processing) and averages them into a single HEIF. MainActor entry;
+    /// does not mutate `formatSelection`/`processingLevel`. `onProgress` fires after each
+    /// frame is captured; `completion` fires once with the stacked HEIF, or nil on any
+    /// capture/decode failure or dimension mismatch (AE is still restored in that case).
+    func captureNightStack(onProgress: @escaping (Int, Int) -> Void,
+                           completion: @escaping (Data?) -> Void) {
+        guard !longExposureRunning else { completion(nil); return }
+        lockAEIfAuto()
+        let recipe = CaptureRecipe(raw: .none, includeProcessed: true,
+                                   bracketing: nil, processing: .zero)
+        captureNightFrame(index: 0, recipe: recipe, session: NightStackSession(),
+                          onProgress: onProgress, completion: completion)
+    }
+
+    private func captureNightFrame(index: Int, recipe: CaptureRecipe, session: NightStackSession,
+                                   onProgress: @escaping (Int, Int) -> Void,
+                                   completion: @escaping (Data?) -> Void) {
+        deviceCapture(recipe: recipe, flashOn: false) { [weak self] resources in
+            guard let self else { return }
+            guard let data = resources.first(where: { $0.kind == .processedHEIF })?.data else {
+                self.finishNightStack(nil, completion: completion)
+                return
+            }
+            onProgress(index + 1, NightStack.frameCount)
+            self.addNightFrame(data, index: index, recipe: recipe, session: session,
+                               onProgress: onProgress, completion: completion)
+        }
+    }
+
+    /// Decode + accumulate run off the main actor (Task.detached) so an ~48MB HEIF decode
+    /// never hitches the preview; only the small state hop back to MainActor touches engine
+    /// state. `session` is safe to hand to the detached task because captures are strictly
+    /// sequential — see `NightStackSession`.
+    private func addNightFrame(_ data: Data, index: Int, recipe: CaptureRecipe,
+                               session: NightStackSession,
+                               onProgress: @escaping (Int, Int) -> Void,
+                               completion: @escaping (Data?) -> Void) {
+        let isLastFrame = index + 1 == NightStack.frameCount
+        Task.detached {
+            let added = session.decodeAndAdd(data)
+            let output = (added && isLastFrame) ? session.encodedHEIF() : nil
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                guard added else {
+                    self.finishNightStack(nil, completion: completion)
+                    return
+                }
+                if isLastFrame {
+                    self.finishNightStack(output, completion: completion)
+                } else {
+                    self.captureNightFrame(index: index + 1, recipe: recipe, session: session,
+                                          onProgress: onProgress, completion: completion)
+                }
+            }
+        }
+    }
+
+    private func finishNightStack(_ data: Data?, completion: @escaping (Data?) -> Void) {
+        restoreAEAfterLock()
+        completion(data)
     }
 
     /// Begin routing camera frames to `tap` (in addition to the overlay driver, if active).
@@ -257,5 +340,38 @@ final class CameraEngine {
             overlayDriver?.ingest(pixelBuffer)
             tap?(pixelBuffer)
         }
+    }
+}
+
+/// Decodes and accumulates NIGHT-stack frames off the main actor. `CameraEngine` hands each
+/// instance to `Task.detached` once per frame, but never touches two frames concurrently: a
+/// frame's capture is only kicked off after the previous frame's `decodeAndAdd` returned, so
+/// this class is never accessed from two tasks at once despite carrying no internal lock.
+/// `@unchecked Sendable` documents that sequential-only-access invariant rather than enforcing
+/// it structurally.
+private final class NightStackSession: @unchecked Sendable {
+    private var accumulator: NightAccumulator?
+    private var width = 0
+    private var height = 0
+
+    /// Decodes `data` and adds it to the accumulator, sizing the accumulator from the first
+    /// frame. Returns false on decode failure, a dimension mismatch against the first frame,
+    /// or NightAccumulator rejecting the frame (byte-count mismatch).
+    func decodeAndAdd(_ data: Data) -> Bool {
+        guard let decoded = NightStacker.decodeRGBA8(data) else { return false }
+        if accumulator == nil {
+            width = decoded.width
+            height = decoded.height
+            accumulator = NightAccumulator(byteCount: decoded.bytes.count)
+        } else if decoded.width != width || decoded.height != height {
+            return false
+        }
+        return accumulator?.add(frame: decoded.bytes) ?? false
+    }
+
+    /// Encodes the running average as HEIF. Only meaningful once all frames were added.
+    func encodedHEIF() -> Data? {
+        guard let accumulator, let average = accumulator.average() else { return nil }
+        return NightStacker.encodeHEIF(rgba: average, width: width, height: height)
     }
 }
