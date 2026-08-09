@@ -49,77 +49,141 @@ struct TopBar: View {
     var rotation: Double = 0
     var longAvailable: Bool = true
 
+    @State private var batteryLevel: Float = -1
+
     var body: some View {
-        // Two semantic rows, no scrolling: row 1 is the image pipeline
-        // (format, processing, flash, timer), row 2 the shooting modes.
-        VStack(spacing: 6) {
-            HStack(spacing: 6) {
-                chip(engine.formatSelection.raw.rawValue,
-                     highlighted: engine.formatSelection.raw != .off) { cycleFormat() }
-                chip(engine.processingLevel.rawValue) { engine.processingLevel = engine.processingLevel.next }
-                chip("FLASH", highlighted: engine.flashOn) { engine.flashOn.toggle() }
-                chip(timerDuration == 0 ? "TIMER" : "\(timerDuration)s",
-                     highlighted: timerDuration > 0) {
-                    timerDuration = timerDuration == 0 ? 3 : timerDuration == 3 ? 10 : 0
-                }
-                Spacer()
-                assistMenu
-            }
-            HStack(spacing: 6) {
-                chip(aspect.label) { aspect = next(aspect, in: AspectRatio.allCases) }
-                chip(engine.bracketCount.map { "BKT \($0)" } ?? "BKT",
-                     highlighted: engine.bracketCount != nil) {
-                    engine.bracketCount = engine.bracketCount == nil ? 3
-                        : engine.bracketCount == 3 ? 5 : nil
-                }
-                if longAvailable {
-                    chip(engine.longMode.label, highlighted: engine.longMode != .off) {
-                        engine.longMode = engine.longMode.next
-                    }
-                    if engine.longMode != .off {
-                        chip(engine.longBlend.rawValue, highlighted: true) {
-                            engine.longBlend = engine.longBlend == .nd ? .trails : .nd
-                        }
-                    }
-                }
-                Spacer()
-            }
+        VStack(spacing: 8) {
+            statusline
+            rail
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 14)
+        .padding(.top, 14)
+        .padding(.bottom, 10)
         .background(
-            LinearGradient(colors: [.black.opacity(0.78), .black.opacity(0.45)],
+            LinearGradient(colors: [.black.opacity(0.92), .black.opacity(0.78)],
                            startPoint: .top, endPoint: .bottom))
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Theme.accent.opacity(0.18))
+                .frame(height: 1)
+        }
+        .onAppear {
+            UIDevice.current.isBatteryMonitoringEnabled = true
+            batteryLevel = UIDevice.current.batteryLevel
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.batteryLevelDidChangeNotification)) { _ in
+            batteryLevel = UIDevice.current.batteryLevel
+        }
     }
 
-    private func chip(_ text: String, highlighted: Bool = false,
-                      action: @escaping () -> Void) -> some View {
-        let foreground: Color = highlighted ? Theme.accent : Color.white.opacity(0.92)
-        let fill: Color = highlighted ? Theme.accent.opacity(0.14) : Color.white.opacity(0.08)
-        let border: Color = highlighted ? Theme.accent.opacity(0.45) : Color.white.opacity(0.14)
+    // MARK: - Statusline
+
+    private var statusline: some View {
+        let pipelineText = RailLabels.pipeline(raw: engine.formatSelection.raw,
+                                                heifCompanion: engine.formatSelection.heifCompanion,
+                                                processing: engine.processingLevel)
+        let pipelineColor: Color = engine.formatSelection.raw != .off
+            ? Theme.accent : Color.white.opacity(0.42)
+        return HStack(spacing: 8) {
+            Text(pipelineText)
+                .foregroundStyle(pipelineColor)
+            Spacer()
+            if batteryLevel >= 0 {
+                Text("BAT \(Int(batteryLevel * 100))")
+                    .foregroundStyle(Color.white.opacity(0.42))
+            }
+            assistMenu
+        }
+        .font(Theme.valueFont(8.5))
+        .tracking(1.2)
+    }
+
+    // MARK: - Rail
+
+    private var rail: some View {
+        HStack(spacing: 1) {
+            railCell(label: "FMT", value: engine.formatSelection.raw.rawValue,
+                     active: engine.formatSelection.raw != .off, action: cycleFormat)
+            railCell(label: "PROC", value: engine.processingLevel.rawValue,
+                     active: engine.processingLevel != .standard) {
+                engine.processingLevel = engine.processingLevel.next
+            }
+            railCell(label: "FLASH", value: engine.flashOn ? "ON" : "—",
+                     active: engine.flashOn) {
+                engine.flashOn.toggle()
+            }
+            railCell(label: "TIMER", value: RailLabels.timer(timerDuration),
+                     active: timerDuration > 0) {
+                timerDuration = timerDuration == 0 ? 3 : timerDuration == 3 ? 10 : 0
+            }
+            railCell(label: "BKT", value: RailLabels.bracket(engine.bracketCount),
+                     active: engine.bracketCount != nil) {
+                engine.bracketCount = engine.bracketCount == nil ? 3
+                    : engine.bracketCount == 3 ? 5 : nil
+            }
+            if longAvailable {
+                railCell(label: "LONG", value: RailLabels.long(engine.longMode),
+                         active: engine.longMode != .off) {
+                    engine.longMode = engine.longMode.next
+                }
+                if engine.longMode != .off {
+                    railCell(label: "BLEND", value: engine.longBlend.rawValue, active: true) {
+                        engine.longBlend = engine.longBlend == .nd ? .trails : .nd
+                    }
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.white.opacity(0.14), lineWidth: 1))
+    }
+
+    private func railCell(label: String, value: String, active: Bool,
+                           action: @escaping () -> Void) -> some View {
+        let valueColor: Color = active ? Theme.accent : Color.white.opacity(0.8)
+        let fill: Color = active ? Theme.accent.opacity(0.10) : Color.white.opacity(0.05)
+        let content = VStack(spacing: 2) {
+            Text(label)
+                .font(Theme.valueFont(7))
+                .tracking(1.4)
+                .foregroundStyle(Color.white.opacity(0.38))
+            Text(value)
+                .font(Theme.valueFont(10))
+                .foregroundStyle(valueColor)
+                .contentTransition(.numericText())
+                .animation(Theme.motion(Theme.springStandard), value: value)
+        }
+        .rotatesWithDevice(rotation)
         return Button {
             action()
             Haptics.light()
         } label: {
-            Text(text)
-                .font(Theme.valueFont(10))
-                .tracking(0.5)
-                .lineLimit(1)
-                .fixedSize()
-                .foregroundStyle(foreground)
-                .padding(.horizontal, 9)
-                .padding(.vertical, 4.5)
-                .background(Capsule().fill(fill))
-                .overlay(Capsule().strokeBorder(border, lineWidth: 1))
-                .rotatesWithDevice(rotation)
-                .contentTransition(.numericText())
-                .animation(Theme.motion(Theme.springStandard), value: text)
+            content
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 7)
+                .background(fill)
+                .overlay(alignment: .bottom) {
+                    if active {
+                        Rectangle()
+                            .fill(Theme.accent)
+                            .frame(height: 2)
+                            .padding(.horizontal, 12)
+                    }
+                }
         }
         .buttonStyle(.plain)
     }
 
+    // MARK: - Assist menu
+
     private var assistMenu: some View {
         Menu {
+            Picker("Aspect", selection: $aspect) {
+                ForEach(AspectRatio.allCases, id: \.self) { ratio in
+                    Text(ratio.label).tag(ratio)
+                }
+            }
             Toggle("Histogram", isOn: overlayBinding(\.histogramEnabled))
             Toggle("Focus Peaking", isOn: overlayBinding(\.peakingEnabled))
             Toggle("Zebra", isOn: overlayBinding(\.zebraEnabled))
@@ -130,6 +194,7 @@ struct TopBar: View {
                 set: { engine.formatSelection.heifCompanion = $0 }))
         } label: {
             Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 14))
                 .foregroundStyle(Theme.accent)
                 .padding(6)
                 .rotatesWithDevice(rotation)
