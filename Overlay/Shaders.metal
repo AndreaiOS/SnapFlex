@@ -105,7 +105,7 @@ using VertexOut = OverlayVertexOut;
 
 fragment float4 waveformFragment(VertexOut in [[stage_in]],
                                  texture2d<uint, access::read> waveform [[texture(0)]]) {
-    uint2 coord = uint2(in.uv.x * 128, in.uv.y * 64);
+    uint2 coord = uint2(min(uint(in.uv.x * 128.0), 127u), min(uint(in.uv.y * 64.0), 63u));
     uint count = waveform.read(coord).r;
     float knee = 8.0;
     float alpha = min(1.0, float(count) / knee);
