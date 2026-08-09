@@ -430,6 +430,9 @@ struct ViewfinderScreen: View {
     }
 
     private func apply(_ recipe: Recipe) {
+        // Closing the dial cancels any in-flight momentum decay, which would
+        // otherwise overwrite the recipe's value on its next tick.
+        selected = nil
         engine.setISO(recipe.iso)
         engine.setShutter(recipe.shutterSeconds)
         engine.setEVBias(recipe.evBias)
