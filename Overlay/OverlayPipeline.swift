@@ -6,13 +6,15 @@ struct OverlaySettings: Equatable {
     var zebraEnabled: Bool
     var histogramEnabled: Bool
     var waveformEnabled: Bool = false
+    var loupeEnabled: Bool = false
     var peakingThreshold: Float
     var zebraThreshold: Float
 
     static let allOff = OverlaySettings(peakingEnabled: false, zebraEnabled: false,
                                         histogramEnabled: false, waveformEnabled: false,
+                                        loupeEnabled: false,
                                         peakingThreshold: 0.25, zebraThreshold: 0.98)
-    var anyEnabled: Bool { peakingEnabled || zebraEnabled || histogramEnabled || waveformEnabled }
+    var anyEnabled: Bool { peakingEnabled || zebraEnabled || histogramEnabled || waveformEnabled || loupeEnabled }
 }
 
 final class OverlayPipeline {
@@ -33,6 +35,7 @@ final class OverlayPipeline {
     private var _settings: OverlaySettings = .allOff
     private var _maskTexture: MTLTexture?
     private var _waveformTexture: MTLTexture?
+    private var _loupeTexture: MTLTexture?
 
     var settings: OverlaySettings {
         get { stateLock.lock(); defer { stateLock.unlock() }; return _settings }
@@ -45,6 +48,10 @@ final class OverlayPipeline {
 
     var waveformTexture: MTLTexture? {
         get { stateLock.lock(); defer { stateLock.unlock() }; return _waveformTexture }
+    }
+
+    var loupeTexture: MTLTexture? {
+        get { stateLock.lock(); defer { stateLock.unlock() }; return _loupeTexture }
     }
 
     init?(device: MTLDevice) {
@@ -121,6 +128,25 @@ final class OverlayPipeline {
             }
         }
 
+        if settings.loupeEnabled {
+            let side = min(320, min(texture.width, texture.height))
+            ensureLoupeTexture(side: side)
+            let loupeTexture = self.loupeTexture
+            if let loupeTexture,
+               let encoder = commandBuffer.makeBlitCommandEncoder() {
+                let originX = (texture.width - side) / 2
+                let originY = (texture.height - side) / 2
+                encoder.copy(from: texture,
+                            sourceSlice: 0, sourceLevel: 0,
+                            sourceOrigin: MTLOrigin(x: originX, y: originY, z: 0),
+                            sourceSize: MTLSize(width: side, height: side, depth: 1),
+                            to: loupeTexture,
+                            destinationSlice: 0, destinationLevel: 0,
+                            destinationOrigin: MTLOrigin(x: 0, y: 0, z: 0))
+                encoder.endEncoding()
+            }
+        }
+
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
@@ -147,5 +173,15 @@ final class OverlayPipeline {
             pixelFormat: .r32Uint, width: 128, height: 64, mipmapped: false)
         descriptor.usage = [.shaderRead, .shaderWrite]
         _waveformTexture = device.makeTexture(descriptor: descriptor)
+    }
+
+    private func ensureLoupeTexture(side: Int) {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        if let texture = _loupeTexture, texture.width == side, texture.height == side { return }
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm, width: side, height: side, mipmapped: false)
+        descriptor.usage = [.shaderRead]
+        _loupeTexture = device.makeTexture(descriptor: descriptor)
     }
 }

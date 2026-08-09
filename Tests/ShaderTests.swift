@@ -127,4 +127,59 @@ import Metal
         _ = pipeline.process(texture: texture, commandQueue: queue)
         #expect(pipeline.waveformTexture == nil)
     }
+
+    /// BGRA texture where each pixel's B/G/R bytes encode its (x, y, x+y) position (mod 256).
+    func positionTexture(device: MTLDevice, width: Int, height: Int) -> MTLTexture {
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)
+        descriptor.usage = [.shaderRead]
+        let texture = device.makeTexture(descriptor: descriptor)!
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        for y in 0..<height {
+            for x in 0..<width {
+                let i = (y * width + x) * 4
+                pixels[i] = UInt8(truncatingIfNeeded: x)        // B
+                pixels[i + 1] = UInt8(truncatingIfNeeded: y)    // G
+                pixels[i + 2] = UInt8(truncatingIfNeeded: x + y) // R
+                pixels[i + 3] = 255                              // A
+            }
+        }
+        texture.replace(region: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0,
+                        withBytes: pixels, bytesPerRow: width * 4)
+        return texture
+    }
+
+    func pixel(_ texture: MTLTexture, x: Int, y: Int) -> [UInt8] {
+        var bytes = [UInt8](repeating: 0, count: 4)
+        texture.getBytes(&bytes, bytesPerRow: 4,
+                         from: MTLRegionMake2D(x, y, 1, 1), mipmapLevel: 0)
+        return bytes
+    }
+
+    @Test func loupeCopiesCenterCrop() throws {
+        let (pipeline, device, queue) = try setupPipeline()
+        pipeline.settings = OverlaySettings(peakingEnabled: false, zebraEnabled: false,
+                                            histogramEnabled: false, waveformEnabled: false,
+                                            loupeEnabled: true,
+                                            peakingThreshold: 0.25, zebraThreshold: 0.98)
+        // 400x400 source; side = min(320, 400) = 320, origin = ((400-320)/2, (400-320)/2) = (40, 40).
+        let texture = positionTexture(device: device, width: 400, height: 400)
+        _ = pipeline.process(texture: texture, commandQueue: queue)
+        let loupe = try #require(pipeline.loupeTexture)
+        #expect(loupe.width == 320)
+        #expect(loupe.height == 320)
+        #expect(pixel(loupe, x: 0, y: 0) == pixel(texture, x: 40, y: 40))
+        #expect(pixel(loupe, x: 319, y: 319) == pixel(texture, x: 359, y: 359))
+    }
+
+    @Test func loupeDisabledProducesNoTexture() throws {
+        let (pipeline, device, queue) = try setupPipeline()
+        pipeline.settings = OverlaySettings(peakingEnabled: false, zebraEnabled: false,
+                                            histogramEnabled: true, waveformEnabled: false,
+                                            loupeEnabled: false,
+                                            peakingThreshold: 0.25, zebraThreshold: 0.98)
+        let texture = makeTexture(device: device, grays: .init(repeating: 128, count: 64))
+        _ = pipeline.process(texture: texture, commandQueue: queue)
+        #expect(pipeline.loupeTexture == nil)
+    }
 }
