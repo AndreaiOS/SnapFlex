@@ -60,9 +60,26 @@ struct ViewfinderScreen: View {
     @State private var recipeBook = RecipeBook(data: UserDefaults.standard.data(forKey: "recipes.book") ?? Data())
     @State private var showSaveRecipeAlert = false
     @State private var newRecipeName = ""
+    @State private var watchRemote = WatchRemote.live()
     @Environment(\.scenePhase) private var scenePhase
 
     private var isLongExposing: Bool { longController?.isExposing == true }
+
+    /// Mirrors the on-screen readout for the watch's status line.
+    private var watchStatusLine: WatchStatus {
+        if let nightProgress {
+            return WatchStatus(line: "NIGHT \(nightProgress.0)/\(nightProgress.1)", canCapture: false)
+        }
+        if isLongExposing, let longController {
+            let remaining = max(0, (longController.session?.targetSeconds ?? 0) - longController.elapsed)
+            return WatchStatus(line: "LONG " + String(format: "%.0fs", remaining), canCapture: false)
+        }
+        return WatchStatus(line: "READY", canCapture: !captureInFlight)
+    }
+
+    /// Small Equatable summary of the state `watchStatusLine` depends on, so a
+    /// single `.onChange` can drive republishing instead of one per field.
+    private var watchStatusKey: String { "\(nightProgress?.0 ?? -1)|\(isLongExposing)|\(captureInFlight)" }
 
     private var chromeBlocked: Bool {
         selected != nil || isLongExposing || countdown != nil || engine.status == .interrupted
@@ -295,6 +312,8 @@ struct ViewfinderScreen: View {
             refreshSaveState()
             chrome.blocked = chromeBlocked
             chrome.interaction(at: Date().timeIntervalSinceReferenceDate)
+            watchRemote?.onCaptureRequested = { takePhoto() }
+            publishWatchStatus()
             chromeTask = Task {
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .milliseconds(500))
@@ -316,6 +335,7 @@ struct ViewfinderScreen: View {
         .onChange(of: showLoupe) { _, on in
             engine.overlaySettings.loupeEnabled = on
         }
+        .onChange(of: watchStatusKey) { _, _ in publishWatchStatus() }
         .onChange(of: engine.values) { _, _ in
             chromeInteractionThrottled()
         }
@@ -708,10 +728,7 @@ struct ViewfinderScreen: View {
             if let data {
                 Haptics.success()
                 if let image = UIImage(data: data) {
-                    withAnimation(Theme.motion(Theme.springBouncy)) {
-                        lastThumbnail = image
-                        thumbnailID += 1
-                    }
+                    setThumbnail(image)
                 }
                 let resource = CaptureResource(kind: .processedHEIF, data: data)
                 Task {
@@ -741,10 +758,7 @@ struct ViewfinderScreen: View {
             }
             if let heif = resources.first(where: { $0.kind == .processedHEIF }),
                let image = UIImage(data: heif.data) {
-                withAnimation(Theme.motion(Theme.springBouncy)) {
-                    lastThumbnail = image
-                    thumbnailID += 1
-                }
+                setThumbnail(image)
             }
             Task {
                 await store.store(resources)
@@ -773,10 +787,7 @@ struct ViewfinderScreen: View {
                 return
             }
             if let image = UIImage(data: data) {
-                withAnimation(Theme.motion(Theme.springBouncy)) {
-                    lastThumbnail = image
-                    thumbnailID += 1
-                }
+                setThumbnail(image)
             }
             Task {
                 await store.store([CaptureResource(kind: .processedHEIF, data: data)])
@@ -784,6 +795,30 @@ struct ViewfinderScreen: View {
                 backgroundGuard.end()
             }
             Haptics.success()
+        }
+    }
+
+    private func publishWatchStatus() {
+        watchRemote?.publishStatus(watchStatusLine)
+    }
+
+    /// Updates the on-screen thumbnail and mirrors it to the watch as a small
+    /// JPEG. Shared by every capture path (normal, LONG, NIGHT) so the resize/
+    /// encode logic lives in exactly one place.
+    private func setThumbnail(_ image: UIImage) {
+        withAnimation(Theme.motion(Theme.springBouncy)) {
+            lastThumbnail = image
+            thumbnailID += 1
+        }
+        guard let watchRemote else { return }
+        let maxDimension: CGFloat = 200
+        let scale = min(1, maxDimension / max(image.size.width, image.size.height))
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let resized = UIGraphicsImageRenderer(size: size).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+        if let jpeg = resized.jpegData(compressionQuality: 0.7) {
+            watchRemote.pushThumbnail(jpeg)
         }
     }
 

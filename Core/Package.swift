@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "SnapFlexCore",
-    platforms: [.iOS(.v18), .macOS(.v14)],
+    platforms: [.iOS(.v18), .macOS(.v14), .watchOS(.v10)],
     products: [
         .library(name: "SnapFlexCore", targets: ["SnapFlexCore"]),
     ],
