@@ -352,6 +352,9 @@ struct ViewfinderScreen: View {
         }
         .onChange(of: chromeBlocked) { _, blocked in
             chrome.blocked = blocked
+            // Dial open, countdown, LONG or interruption all outrank a
+            // converging ETTR loop.
+            if blocked { ettrIterations = nil }
         }
         .onChange(of: showLoupe) { _, on in
             engine.overlaySettings.loupeEnabled = on
@@ -732,6 +735,7 @@ struct ViewfinderScreen: View {
 
     func takePhoto() {
         guard engine.status != .interrupted else { return }
+        ettrIterations = nil   // a capture always outranks a converging ETTR loop
         chromeInteraction()
         if let longController, engine.longMode != .off || longController.isExposing {
             guard !captureInFlight else { return }
