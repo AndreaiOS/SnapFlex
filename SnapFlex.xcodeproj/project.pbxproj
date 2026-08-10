@@ -44,6 +44,7 @@
 		BD97ECE29407C58CC08C484A /* CaptureStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */; };
 		C2A06D0C55EB82C1ACBCC3D7 /* WatchRemote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF3664C4422E44EEA85F229 /* WatchRemote.swift */; };
 		C79090B311167DA14E44AA1E /* NightStacker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07A7E20103C5B51ABA4DB02 /* NightStacker.swift */; };
+		CC6F9C976C4F151F46F80D8D /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4F57F117A7523DE4DADB24 /* Log.swift */; };
 		CF0C267CD2FC7CF96E5CDB29 /* LongExposureShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9ADD6FE3BAD591E1BB3BFE1B /* LongExposureShaders.metal */; };
 		D8CD8F617A9A903B42031249 /* CaptureStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9402B485A2A9B401820D44 /* CaptureStoreTests.swift */; };
 		DABA603F82293BE87F1A0236 /* LongPreviewMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19B024D9F4289B24BB569230 /* LongPreviewMetalView.swift */; };
@@ -104,6 +105,7 @@
 		457C3AFC05BB91ED93F7640B /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStore.swift; sourceTree = "<group>"; };
 		489315A21E03DCB3EF71FEA4 /* PhotoCaptureCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureCoordinatorTests.swift; sourceTree = "<group>"; };
+		4A4F57F117A7523DE4DADB24 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		537E1319B1EEC5386E46AF9B /* CameraDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDevice.swift; sourceTree = "<group>"; };
 		5563AF0DF2EA31A94A8586D7 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		5A0F5A9DB50479DF5CCC32FB /* OrientationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationModel.swift; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 				537E1319B1EEC5386E46AF9B /* CameraDevice.swift */,
 				9BE59ECB7DFF6517F2CCB8E2 /* CameraEngine.swift */,
 				46C7A3FDF00AE9AF1B45AEB7 /* CaptureStore.swift */,
+				4A4F57F117A7523DE4DADB24 /* Log.swift */,
 				B07A7E20103C5B51ABA4DB02 /* NightStacker.swift */,
 				327863783B6BF1A880505895 /* PhotoCaptureCoordinator.swift */,
 				F54B6533D0105E7C3B9B783C /* RealCameraDevice.swift */,
@@ -407,6 +410,7 @@
 				1E4E5547906B4660D5497884 /* GridLevelOverlay.swift in Sources */,
 				87DDBA41442BF83685A496C6 /* Haptics.swift in Sources */,
 				40FC27F675BE9E4FDA19D5A3 /* HistogramView.swift in Sources */,
+				CC6F9C976C4F151F46F80D8D /* Log.swift in Sources */,
 				621CCED423DBF124DEA90B41 /* LongExposureAccumulator.swift in Sources */,
 				4B6CC2E95068B4C7FAE487E4 /* LongExposureController.swift in Sources */,
 				F2B5FC076758871D27E4D32B /* LongExposureHUD.swift in Sources */,

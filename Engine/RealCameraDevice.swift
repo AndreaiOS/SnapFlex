@@ -52,8 +52,10 @@ final class RealCameraDevice: NSObject, CameraDeviceProtocol {
     /// Media services can reset underneath us (thermal events, daemon crashes);
     /// try to restart instead of leaving a frozen preview.
     @objc private func sessionRuntimeError() {
+        Log.session.error("AVCaptureSession runtime error; attempting restart")
         sessionQueue.async { [self] in
             if !session.isRunning { session.startRunning() }
+            Log.session.info("post-error session running: \(self.session.isRunning)")
             notifyStatus(session.isRunning ? .running : .interrupted)
         }
     }

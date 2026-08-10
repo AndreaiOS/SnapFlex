@@ -5,6 +5,7 @@ import SnapFlexCore
 import WatchConnectivity
 
 final class FakeWatchSession: WatchSessionProtocol {
+    var isCounterpartAppInstalled = true
     var isReachable = true
     var sent: [[String: Any]] = []
 

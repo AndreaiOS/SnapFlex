@@ -1,18 +1,21 @@
 import Foundation
 import SnapFlexCore
 import WatchConnectivity
+import os
 
 /// Abstraction over `WCSession` so `WatchRemote` is testable without a real
 /// Watch Connectivity session, which behaves inertly (and can misbehave) without
 /// a paired watch.
 protocol WatchSessionProtocol: AnyObject {
     var isReachable: Bool { get }
+    var isCounterpartAppInstalled: Bool { get }
     func send(_ message: [String: Any])
 }
 
 /// Fire-and-forget adapter: `WCSession.sendMessage` takes reply/error handlers
 /// we don't need, since status/thumbnail pushes are best-effort.
 extension WCSession: WatchSessionProtocol {
+    var isCounterpartAppInstalled: Bool { isWatchAppInstalled }
     func send(_ message: [String: Any]) {
         sendMessage(message, replyHandler: nil, errorHandler: nil)
     }
@@ -46,14 +49,18 @@ final class WatchRemote: NSObject, ObservableObject, WCSessionDelegate {
     /// `nil` when Watch Connectivity isn't supported on this device.
     static func live() -> WatchRemote? { shared }
 
+    private var canSend: Bool {
+        session.isCounterpartAppInstalled && session.isReachable
+    }
+
     func publishStatus(_ status: WatchStatus) {
         lastStatus = status
-        guard session.isReachable else { return }
+        guard canSend else { return }
         session.send([WatchMessageKey.status: status.encoded()])
     }
 
     func pushThumbnail(_ jpeg: Data) {
-        guard session.isReachable else { return }
+        guard canSend else { return }
         session.send([WatchMessageKey.thumbnail: jpeg])
     }
 
@@ -76,6 +83,7 @@ final class WatchRemote: NSObject, ObservableObject, WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        Log.watch.info("message from watch: \(message.keys.joined(separator: ","))")
         guard message[WatchMessageKey.capture] != nil else { return }
         DispatchQueue.main.async { [weak self] in
             self?.onCaptureRequested?()

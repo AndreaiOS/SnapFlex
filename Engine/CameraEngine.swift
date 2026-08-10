@@ -188,6 +188,11 @@ final class CameraEngine {
                                         bracketing: bracketing,
                                         processing: processingLevel)
         deviceCapture(recipe: recipe, flashOn: flashOn) { [weak self] resources in
+            if resources.isEmpty {
+                Log.capture.error("capture returned no resources")
+            } else {
+                Log.capture.info("capture delivered \(resources.count) resource(s)")
+            }
             self?.lastCapture = resources
             onResult(resources)
         }
@@ -265,8 +270,13 @@ final class CameraEngine {
     func captureNightStack(onProgress: @escaping (Int, Int) -> Void,
                            completion: @escaping (Data?) -> Void) {
         guard !longExposureRunning else { completion(nil); return }
-        guard !nightStackRunning else { completion(nil); return }
+        guard !nightStackRunning else {
+            Log.night.error("night stack rejected: already running")
+            completion(nil)
+            return
+        }
         nightStackRunning = true
+        Log.night.info("night stack started (\(NightStack.frameCount) frames)")
         lockAEIfAuto()
         let recipe = CaptureRecipe(raw: .none, includeProcessed: true,
                                    bracketing: nil, processing: .zero)
