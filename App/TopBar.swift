@@ -52,6 +52,7 @@ struct TopBar: View {
     var onApplyRecipe: (Recipe) -> Void = { _ in }
     var onSaveRecipe: () -> Void = {}
     var onDeleteRecipe: (Recipe) -> Void = { _ in }
+    var onETTR: () -> Void = {}
 
     @State private var batteryLevel: Float = -1
 
@@ -215,6 +216,8 @@ struct TopBar: View {
 
     private var assistMenu: some View {
         Menu {
+            Button("ETTR exposure") { onETTR() }
+            Divider()
             Picker("Aspect", selection: $aspect) {
                 ForEach(AspectRatio.allCases, id: \.self) { ratio in
                     Text(ratio.label).tag(ratio)

@@ -61,6 +61,7 @@ struct ViewfinderScreen: View {
     @State private var showSaveRecipeAlert = false
     @State private var newRecipeName = ""
     @State private var watchRemote = WatchRemote.live()
+    @State private var ettrIterations: Int?
     @Environment(\.scenePhase) private var scenePhase
 
     private var isLongExposing: Bool { longController?.isExposing == true }
@@ -95,6 +96,18 @@ struct ViewfinderScreen: View {
             Rectangle().fill(Theme.accent).frame(width: 8, height: 2)
             Rectangle().fill(Theme.accent).frame(width: 2, height: 8)
         }
+    }
+
+    /// Histogram with the ETTR-running accent border; kept as its own small
+    /// expression so the Button's label closure stays cheap for the type-checker.
+    private func histogramLabel(bins: [UInt32]) -> some View {
+        let running = ettrIterations != nil
+        return HistogramView(bins: bins)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Theme.accent, lineWidth: running ? 1.5 : 0)
+            )
+            .animation(Theme.motion(Theme.springStandard), value: running)
     }
 
     private func chromeInteraction() {
@@ -173,13 +186,16 @@ struct ViewfinderScreen: View {
                            recipes: recipeBook.recipes,
                            onApplyRecipe: apply,
                            onSaveRecipe: beginSaveRecipe,
-                           onDeleteRecipe: deleteRecipe)
+                           onDeleteRecipe: deleteRecipe,
+                           onETTR: startETTR)
                         .disabled(isLongExposing || captureInFlight)
                         .opacity(isLongExposing || captureInFlight ? 0.4 : 1)
                     if engine.overlaySettings.histogramEnabled, let bins = engine.histogramBins {
                         HStack {
                             Spacer()
-                            HistogramView(bins: bins).padding(8)
+                            Button { startETTR() } label: { histogramLabel(bins: bins) }
+                                .buttonStyle(.plain)
+                                .padding(8)
                         }
                     }
                 }
@@ -341,6 +357,7 @@ struct ViewfinderScreen: View {
             engine.overlaySettings.loupeEnabled = on
         }
         .onChange(of: watchStatusKey) { _, _ in publishWatchStatus() }
+        .onChange(of: engine.histogramBins) { _, bins in stepETTR(bins) }
         .onChange(of: engine.values) { _, _ in
             chromeInteractionThrottled()
         }
@@ -667,6 +684,50 @@ struct ViewfinderScreen: View {
             .tracking(0.9)
             .offset(y: -52)
             .rotatesWithDevice(orientation.uiAngle)
+    }
+
+    // MARK: - ETTR
+
+    private func startETTR() {
+        guard !isLongExposing, !captureInFlight, !engine.nightStackRunning,
+              ettrIterations == nil else { return }
+        if !engine.overlaySettings.histogramEnabled {
+            engine.overlaySettings.histogramEnabled = true
+        }
+        ettrIterations = 0
+    }
+
+    /// One convergence step, driven by each new histogram frame (~15Hz while
+    /// the overlay is on). No-ops instantly when idle so the high-frequency
+    /// `.onChange` stays cheap.
+    private func stepETTR(_ bins: [UInt32]?) {
+        guard let iterations = ettrIterations, let bins else { return }
+        let delta = ETTR.adjustment(bins: bins)
+        guard delta != 0 else {
+            iterations > 0 ? Haptics.success() : Haptics.light()
+            ettrIterations = nil
+            return
+        }
+        applyETTR(delta: delta)
+        let next = iterations + 1
+        ettrIterations = next
+        if next >= 6 {
+            Haptics.success()
+            ettrIterations = nil
+        }
+    }
+
+    /// AUTO exposure (either ISO or shutter still on auto) nudges EV bias;
+    /// full MANUAL nudges shutter by the stop delta, leaving ISO untouched
+    /// (noise-optimal). Both paths rely on the engine's own clamping.
+    private func applyETTR(delta: Double) {
+        guard engine.values.iso != nil, let shutter = engine.values.shutterSeconds else {
+            let bias = engine.values.evBias + Float(delta)
+            let clamped = min(max(bias, engine.ranges.evBias.lowerBound), engine.ranges.evBias.upperBound)
+            engine.setEVBias(clamped)
+            return
+        }
+        engine.setShutter(shutter * pow(2, delta))
     }
 
     func takePhoto() {

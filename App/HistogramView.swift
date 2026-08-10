@@ -27,6 +27,5 @@ struct HistogramView: View {
         .frame(width: 100, height: 46)
         .background(Theme.chrome)
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        .allowsHitTesting(false)
     }
 }

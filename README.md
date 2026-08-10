@@ -67,3 +67,4 @@ not work in the simulator).
 - [ ] Loupe appears while focusing manually (dial open + MF); magnified center crop is sharp and live
 - [ ] Save a recipe, relaunch, apply: exposure/WB/format/PROC/aspect all restore (clamped to lens limits)
 - [ ] Watch remote: shutter fires from the wrist (normal + NIGHT), status updates live, thumbnail lands; OFFLINE when phone unreachable
+- [ ] Tap histogram (or menu ETTR): exposure settles just below clipping; works in auto (EV) and full manual (shutter)
