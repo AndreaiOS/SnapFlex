@@ -222,9 +222,11 @@ struct ParameterDial: View {
         case .iso:
             let stops: [Double] = [25, 50, 100, 200, 400, 800, 1600, 3200]
             let low = Double(ranges.iso.lowerBound), high = Double(ranges.iso.upperBound)
-            return stops.filter { $0 >= low && $0 <= high }
+            return withEndpoints(stops.filter { $0 >= low && $0 <= high }, low: low, high: high)
         case .shutter:
-            return RealCameraDevice.shutterStops(in: ranges.shutterSeconds)
+            return withEndpoints(RealCameraDevice.shutterStops(in: ranges.shutterSeconds),
+                                 low: ranges.shutterSeconds.lowerBound,
+                                 high: ranges.shutterSeconds.upperBound)
         case .ev:
             let low = Double(ranges.evBias.lowerBound), high = Double(ranges.evBias.upperBound)
             guard high > low else { return [low] }
@@ -239,6 +241,18 @@ struct ParameterDial: View {
         case .focus:
             return nil
         }
+    }
+
+    /// Stop grids rarely reach the sensor's true limits (e.g. minISO 55 vs the
+    /// first stop at 100), which made the endpoints unreachable after detent
+    /// snap. Always include the exact range bounds as detents.
+    private func withEndpoints(_ stops: [Double], low: Double, high: Double) -> [Double] {
+        guard high > low else { return [low] }
+        var values = stops
+        let epsilon = (high - low) * 0.001
+        if values.first.map({ abs($0 - low) > epsilon }) ?? true { values.insert(low, at: 0) }
+        if values.last.map({ abs($0 - high) > epsilon }) ?? true { values.append(high) }
+        return values
     }
 
     private func normalizedForDetent(_ value: Double) -> Double {
